@@ -5,7 +5,7 @@
 # steps (this sandbox's outbound network requires it) — never declared with
 # ENV, so nothing proxy-related is baked into the image or reaches the
 # deployed app at runtime.
-FROM node:22-slim AS build
+FROM node:22-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5 AS build
 ARG HTTPS_PROXY
 WORKDIR /app
 COPY server/.build/ca-bundle.crt /tmp/ca-bundle.crt
@@ -16,7 +16,7 @@ COPY server/src ./src
 RUN npm run build
 RUN rm -f /tmp/ca-bundle.crt
 
-FROM node:22-slim
+FROM node:22-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
 ARG HTTPS_PROXY
 WORKDIR /app
 ENV NODE_ENV=production
