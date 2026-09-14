@@ -29,8 +29,8 @@ export const config = {
   groq: {
     apiKey: process.env.GROQ_API_KEY ?? "",
     baseUrl: process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1",
-    generationModel: process.env.GROQ_GENERATION_MODEL ?? "llama-3.3-70b-versatile",
-    modelVersion: process.env.MODEL_VERSION ?? "groq-llama-3.3-70b-v1",
+    generationModel: process.env.GROQ_GENERATION_MODEL ?? "openai/gpt-oss-120b",
+    modelVersion: process.env.MODEL_VERSION ?? "groq-gpt-oss-120b-v1",
     transcriptionModel: process.env.GROQ_TRANSCRIPTION_MODEL ?? "whisper-large-v3",
   },
 

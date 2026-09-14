@@ -84,7 +84,7 @@ local dev. For a real standalone install (own icon, no Expo Go wrapper), build w
 ### Known gaps for a v1 demo
 
 - Friending is a single-step mutual add by email (no request/accept flow).
-- Chapter writing and grading run on Groq's free-tier `llama-3.3-70b-versatile`
+- Chapter writing and grading run on Groq's free-tier `openai/gpt-oss-120b`
   rather than a frontier model, since the goal here was $0 to run. Quality is
   decent but noticeably rougher than Claude/GPT-4-class output; swap
   `GROQ_GENERATION_MODEL` for a larger Groq-hosted model, or repoint
