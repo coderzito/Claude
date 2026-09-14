@@ -12,6 +12,10 @@ primary_region = "iad"
 
 [env]
   PORT = "8080"
+  STUDY_MINUTES = "4"
+  MIN_STUDY_MINUTES_BEFORE_SPEECH = "3"
+  SPEECH_MIN_SECONDS = "60"
+  SPEECH_MAX_SECONDS = "120"
 
 [http_service]
   internal_port = 8080

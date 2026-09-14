@@ -1,9 +1,11 @@
 # Cold Call
 
-A study app: roll a random subtopic, study an AI-generated chapter for 15 minutes,
-then record a 2-5 minute spoken explanation. The app grades the speech against the
+A study app: roll a random subtopic, study an AI-generated chapter for 4 minutes,
+then record a 1-2 minute spoken explanation. The app grades the speech against the
 chapter it generated, because it holds the chapter's key points as structured data
-from the same generation call.
+from the same generation call. Timing is config (`STUDY_MINUTES`,
+`SPEECH_MIN_SECONDS`/`SPEECH_MAX_SECONDS` in `server/src/config.ts` / `fly.toml`),
+not hardcoded to the build brief's original 15 min / 2-5 min.
 
 - **Client**: Expo (React Native), SDK 57 — installs to your phone's home screen like
   a real app (via Expo Go while developing, or a standalone build). Uses `expo-audio`
@@ -26,8 +28,9 @@ from the same generation call.
   are per-deck config (`deck_configs` table), not hardcoded.
 - **Anti-abuse**: study and speech timers are server timestamps
   (`study_started_at`, `speech_started_at`); the client's countdown is cosmetic. A
-  session is rejected if speech starts less than 12 minutes after study starts, or
-  if the recorded duration falls outside 2-5 minutes. Only one audio upload is
+  session is rejected if speech starts less than `MIN_STUDY_MINUTES_BEFORE_SPEECH`
+  after study starts, or if the recorded duration falls outside the configured
+  min/max. Only one audio upload is
   accepted per session (the status flip to `transcribing` makes a second upload
   attempt fail), and the RN client foreground-only recording flow rules out
   pause/resume multi-blob uploads at the source. Likely script-reading (low pause

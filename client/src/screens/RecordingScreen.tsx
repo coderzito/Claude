@@ -16,8 +16,8 @@ import { theme } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Recording">;
 
-const MIN_SECONDS = 120;
-const MAX_SECONDS = 300;
+const MIN_SECONDS = 60;
+const MAX_SECONDS = 120;
 
 type Phase = "preparing" | "recording" | "uploading" | "processing";
 

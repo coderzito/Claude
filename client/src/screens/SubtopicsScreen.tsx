@@ -62,7 +62,7 @@ export default function SubtopicsScreen({ route, navigation }: Props) {
 
       <View style={{ gap: 12 }}>
         <Button title={rolled ? "Roll again" : "Roll"} variant={rolled ? "secondary" : "primary"} onPress={roll} loading={rolling} />
-        {rolled && <Button title="Start studying (15 min)" onPress={startStudying} loading={starting} />}
+        {rolled && <Button title="Start studying (4 min)" onPress={startStudying} loading={starting} />}
       </View>
     </Screen>
   );
