@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -9,8 +9,8 @@ export function ProgressRing({
   size = 160,
   strokeWidth = 12,
   progress,
-  color = theme.accent,
-  trackColor = theme.track,
+  color,
+  trackColor,
   children,
 }: {
   size?: number;
@@ -21,6 +21,9 @@ export function ProgressRing({
   trackColor?: string;
   children?: React.ReactNode;
 }) {
+  const theme = useTheme();
+  const resolvedColor = color ?? theme.accent;
+  const resolvedTrackColor = trackColor ?? theme.track;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const animated = useRef(new Animated.Value(0)).current;
@@ -45,7 +48,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={trackColor}
+          stroke={resolvedTrackColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -53,7 +56,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={color}
+          stroke={resolvedColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
@@ -71,8 +74,8 @@ export function ProgressRing({
 export function SegmentedBar({
   segments,
   filled,
-  color = theme.accent,
-  trackColor = theme.track,
+  color,
+  trackColor,
   height = 8,
   gap = 4,
 }: {
@@ -83,6 +86,9 @@ export function SegmentedBar({
   height?: number;
   gap?: number;
 }) {
+  const theme = useTheme();
+  const resolvedColor = color ?? theme.accent;
+  const resolvedTrackColor = trackColor ?? theme.track;
   return (
     <View style={{ flexDirection: "row", gap }}>
       {Array.from({ length: segments }).map((_, i) => (
@@ -92,7 +98,7 @@ export function SegmentedBar({
             flex: 1,
             height,
             borderRadius: height / 2,
-            backgroundColor: i < filled ? color : trackColor,
+            backgroundColor: i < filled ? resolvedColor : resolvedTrackColor,
           }}
         />
       ))}

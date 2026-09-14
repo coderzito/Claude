@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Text, View, RefreshControl, ScrollView } from "react-native";
+import { Text, View, RefreshControl, ScrollView, Pressable } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
@@ -8,12 +8,13 @@ import { useAuth } from "../context/AuthContext";
 import { Screen, Card, Button } from "../components/ui";
 import { SegmentedBar } from "../components/Progress";
 import { DieIcon } from "../components/DieIcon";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { StreakStatus } from "../api/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export default function HomeScreen({ navigation }: Props) {
+  const theme = useTheme();
   const { user } = useAuth();
   const [streak, setStreak] = useState<StreakStatus | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,6 +59,9 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={{ color: theme.subtext, marginTop: theme.space.sm, fontSize: 13 }}>
               {streak.sessionsCompleted} of {streak.weeklyQuota} sessions this week
             </Text>
+            <Pressable onPress={() => navigation.navigate("Stats")} style={{ marginTop: theme.space.md }}>
+              <Text style={{ color: theme.accent, fontSize: 13, fontWeight: "600" }}>See weekly & monthly trends</Text>
+            </Pressable>
           </Card>
         )}
 

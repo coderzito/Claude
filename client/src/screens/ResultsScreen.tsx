@@ -6,7 +6,8 @@ import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
 import { Screen, Card, Button } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
+import type { Theme } from "../theme";
 import { usePreferences } from "../context/PreferencesContext";
 import type { ScoreResult } from "../api/types";
 
@@ -18,13 +19,14 @@ interface ResultResponse {
   score: ScoreResult | null;
 }
 
-function scoreColor(n: number): string {
+function scoreColor(n: number, theme: Theme): string {
   if (n >= 80) return theme.good;
   if (n >= 50) return theme.warn;
   return theme.bad;
 }
 
 function ScoreReveal({ total }: { total: number }) {
+  const theme = useTheme();
   const { prefs } = usePreferences();
   const scale = useRef(new Animated.Value(prefs.reduceMotion ? 1 : 0.6)).current;
   const opacity = useRef(new Animated.Value(prefs.reduceMotion ? 1 : 0)).current;
@@ -48,8 +50,8 @@ function ScoreReveal({ total }: { total: number }) {
 
   return (
     <Animated.View style={{ alignItems: "center", marginBottom: theme.space.xl, opacity, transform: [{ scale }] }}>
-      <ProgressRing size={148} strokeWidth={12} progress={Math.max(0, Math.min(1, total / 100))} color={scoreColor(total)}>
-        <Text style={{ color: scoreColor(total), fontSize: 40, fontWeight: "800" }}>{Math.round(total)}</Text>
+      <ProgressRing size={148} strokeWidth={12} progress={Math.max(0, Math.min(1, total / 100))} color={scoreColor(total, theme)}>
+        <Text style={{ color: scoreColor(total, theme), fontSize: 40, fontWeight: "800" }}>{Math.round(total)}</Text>
       </ProgressRing>
       <Text style={{ color: theme.subtext, marginTop: theme.space.md }}>Total score</Text>
     </Animated.View>
@@ -57,9 +59,10 @@ function ScoreReveal({ total }: { total: number }) {
 }
 
 function Subscore({ label, value }: { label: string; value: number }) {
+  const theme = useTheme();
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
-      <Text style={{ color: scoreColor(value), fontSize: 22, fontWeight: "700" }}>{value}</Text>
+      <Text style={{ color: scoreColor(value, theme), fontSize: 22, fontWeight: "700" }}>{value}</Text>
       <Text style={{ color: theme.subtext, fontSize: 12, marginTop: 2 }}>{label}</Text>
     </View>
   );
@@ -67,6 +70,7 @@ function Subscore({ label, value }: { label: string; value: number }) {
 
 export default function ResultsScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
+  const theme = useTheme();
   const [result, setResult] = useState<ResultResponse | null>(null);
 
   useEffect(() => {

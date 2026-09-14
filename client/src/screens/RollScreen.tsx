@@ -5,7 +5,7 @@ import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
 import { Screen, Field, Button, Divider } from "../components/ui";
 import { DieIcon } from "../components/DieIcon";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { Subtopic } from "../api/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Roll">;
@@ -13,6 +13,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Roll">;
 type Busy = "none" | "roll" | "custom";
 
 export default function RollScreen({ navigation }: Props) {
+  const theme = useTheme();
   const [busy, setBusy] = useState<Busy>("none");
   const [topic, setTopic] = useState("");
 

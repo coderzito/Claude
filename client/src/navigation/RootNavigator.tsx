@@ -1,9 +1,9 @@
 import React from "react";
 import { ActivityIndicator, View, Pressable, Text } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import RollScreen from "../screens/RollScreen";
@@ -16,6 +16,7 @@ import HistoryScreen from "../screens/HistoryScreen";
 import LeaderboardScreen from "../screens/LeaderboardScreen";
 import HomeScreen from "../screens/HomeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import StatsScreen from "../screens/StatsScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -30,24 +31,43 @@ export type RootStackParamList = {
   Results: { sessionId: string };
   History: undefined;
   Leaderboard: undefined;
+  Stats: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const { user, loading } = useAuth();
+  const theme = useTheme();
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#111318" }}>
-        <ActivityIndicator color="#fff" />
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: theme.bg }}>
+        <ActivityIndicator color={theme.text} />
       </View>
     );
   }
 
+  const navTheme = {
+    ...(theme.mode === "dark" ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(theme.mode === "dark" ? DarkTheme.colors : DefaultTheme.colors),
+      background: theme.bg,
+      card: theme.card,
+      text: theme.text,
+      border: theme.border,
+      primary: theme.accent,
+    },
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: "#111318" }, headerTintColor: "#fff" }}>
+    <NavigationContainer theme={navTheme}>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: theme.card },
+          headerTintColor: theme.text,
+        }}
+      >
         {user ? (
           <>
             <Stack.Screen
@@ -71,6 +91,7 @@ export default function RootNavigator() {
             <Stack.Screen name="Results" component={ResultsScreen} options={{ title: "Results", headerBackVisible: false }} />
             <Stack.Screen name="History" component={HistoryScreen} options={{ title: "History" }} />
             <Stack.Screen name="Leaderboard" component={LeaderboardScreen} options={{ title: "Friends" }} />
+            <Stack.Screen name="Stats" component={StatsScreen} options={{ title: "Your trends" }} />
           </>
         ) : (
           <>

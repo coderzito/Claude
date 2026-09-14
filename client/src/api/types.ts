@@ -87,3 +87,20 @@ export interface StreakStatus {
   freezesRemaining: number;
   currentStreakWeeks: number;
 }
+
+export interface WeekStat {
+  weekStart: string;
+  sessionsCompleted: number;
+}
+
+export interface MonthStat {
+  month: string;
+  sessionsCompleted: number;
+  avgScore: number | null;
+}
+
+export interface StreakHistory {
+  weeklyQuota: number;
+  weeks: WeekStat[];
+  months: MonthStat[];
+}

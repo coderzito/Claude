@@ -14,7 +14,7 @@ import { api, API_URL, getToken } from "../api/client";
 import { Screen, Button } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
 import LevelMeter from "../components/LevelMeter";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import { usePreferences } from "../context/PreferencesContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Recording">;
@@ -28,6 +28,7 @@ const recordingOptions = { ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: 
 
 export default function RecordingScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
+  const theme = useTheme();
   const { prefs } = usePreferences();
   const [phase, setPhase] = useState<Phase>("preparing");
   const stoppedRef = useRef(false);

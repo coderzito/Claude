@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   Pressable,
   Text,
@@ -11,8 +11,53 @@ import {
   type TextInputProps,
 } from "react-native";
 import * as Haptics from "expo-haptics";
-import { theme, shadow } from "../theme";
+import { useTheme } from "../context/ThemeContext";
+import type { Theme } from "../theme";
 import { usePreferences } from "../context/PreferencesContext";
+
+function getStyles(theme: Theme) {
+  return StyleSheet.create({
+    screen: { flex: 1, backgroundColor: theme.bg, padding: theme.space.xl },
+    card: {
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderWidth: 1,
+      borderRadius: theme.radius,
+      padding: theme.space.lg,
+    },
+    label: { color: theme.subtext, marginBottom: theme.space.xs + 2, fontSize: 13, fontWeight: "500" },
+    input: {
+      backgroundColor: theme.cardAlt,
+      borderColor: theme.border,
+      borderWidth: 1,
+      borderRadius: theme.radiusSm,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: theme.text,
+      fontSize: 16,
+    },
+    button: {
+      backgroundColor: theme.accent,
+      borderRadius: theme.radiusSm + 2,
+      paddingVertical: 15,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonSecondary: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: theme.borderStrong,
+    },
+    buttonGhost: { backgroundColor: "transparent", paddingVertical: 8 },
+    buttonDisabled: { opacity: 0.45 },
+    buttonText: { color: theme.accentText, fontSize: 16, fontWeight: "700" },
+    buttonTextSecondary: { color: theme.text },
+    buttonTextGhost: { color: theme.accent, fontWeight: "600" },
+    dividerRow: { flexDirection: "row", alignItems: "center", marginVertical: theme.space.xl },
+    dividerLine: { flex: 1, height: 1, backgroundColor: theme.border },
+    dividerLabel: { color: theme.faint, marginHorizontal: theme.space.md, fontSize: 13 },
+  });
+}
 
 export function Button({
   title,
@@ -29,6 +74,8 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost";
   icon?: React.ReactNode;
 }) {
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
   const isDisabled = disabled || loading;
   const scale = useRef(new Animated.Value(1)).current;
   const { prefs } = usePreferences();
@@ -62,7 +109,7 @@ export function Button({
         ]}
       >
         {loading ? (
-          <ActivityIndicator color={variant === "primary" ? "#0a0c10" : theme.text} />
+          <ActivityIndicator color={variant === "primary" ? theme.accentText : theme.text} />
         ) : (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {icon}
@@ -84,6 +131,8 @@ export function Button({
 
 export function Field(props: TextInputProps & { label: string }) {
   const { label, style, ...rest } = props;
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
   return (
     <View style={{ marginBottom: theme.space.lg }}>
       <Text style={styles.label}>{label}</Text>
@@ -98,10 +147,14 @@ export function Field(props: TextInputProps & { label: string }) {
 }
 
 export function Card({ children, style, flat }: { children: React.ReactNode; style?: object; flat?: boolean }) {
-  return <View style={[styles.card, !flat && shadow, style]}>{children}</View>;
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+  return <View style={[styles.card, !flat && theme.shadow, style]}>{children}</View>;
 }
 
 export function Screen({ children, style }: { children: React.ReactNode; style?: object }) {
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
   return <View style={[styles.screen, style]}>{children}</View>;
 }
 
@@ -114,6 +167,7 @@ export function Segmented<T extends string>({
   value: T;
   onChange: (value: T) => void;
 }) {
+  const theme = useTheme();
   const { prefs } = usePreferences();
   return (
     <View style={{ flexDirection: "row", backgroundColor: theme.cardAlt, borderRadius: theme.radiusSm, padding: 3 }}>
@@ -134,7 +188,7 @@ export function Segmented<T extends string>({
               backgroundColor: active ? theme.accent : "transparent",
             }}
           >
-            <Text style={{ color: active ? "#0a0c10" : theme.subtext, fontWeight: active ? "700" : "500", fontSize: 13 }}>
+            <Text style={{ color: active ? theme.accentText : theme.subtext, fontWeight: active ? "700" : "500", fontSize: 13 }}>
               {opt.label}
             </Text>
           </Pressable>
@@ -155,6 +209,7 @@ export function SwitchRow({
   value: boolean;
   onChange: (value: boolean) => void;
 }) {
+  const theme = useTheme();
   const { prefs } = usePreferences();
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -176,6 +231,8 @@ export function SwitchRow({
 }
 
 export function Divider({ label }: { label?: string }) {
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
   if (!label) return <View style={styles.dividerLine} />;
   return (
     <View style={styles.dividerRow}>
@@ -185,45 +242,3 @@ export function Divider({ label }: { label?: string }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.bg, padding: theme.space.xl },
-  card: {
-    backgroundColor: theme.card,
-    borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: theme.radius,
-    padding: theme.space.lg,
-  },
-  label: { color: theme.subtext, marginBottom: theme.space.xs + 2, fontSize: 13, fontWeight: "500" },
-  input: {
-    backgroundColor: theme.cardAlt,
-    borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: theme.radiusSm,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: theme.text,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: theme.accent,
-    borderRadius: theme.radiusSm + 2,
-    paddingVertical: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonSecondary: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: theme.borderStrong,
-  },
-  buttonGhost: { backgroundColor: "transparent", paddingVertical: 8 },
-  buttonDisabled: { opacity: 0.45 },
-  buttonText: { color: "#0a0c10", fontSize: 16, fontWeight: "700" },
-  buttonTextSecondary: { color: theme.text },
-  buttonTextGhost: { color: theme.accent, fontWeight: "600" },
-  dividerRow: { flexDirection: "row", alignItems: "center", marginVertical: theme.space.xl },
-  dividerLine: { flex: 1, height: 1, backgroundColor: theme.border },
-  dividerLabel: { color: theme.faint, marginHorizontal: theme.space.md, fontSize: 13 },
-});

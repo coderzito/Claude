@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 
 // expo-audio reports metering in dBFS, roughly -160 (silence) to 0 (peak).
 // Map that to a 0-1 fill so the user can see the mic is actually picking them up.
@@ -11,6 +11,7 @@ function normalize(db: number): number {
 }
 
 export default function LevelMeter({ meteringDb }: { meteringDb: number | null }) {
+  const theme = useTheme();
   const level = meteringDb === null ? 0 : normalize(meteringDb);
   const bars = 20;
   const litBars = Math.round(level * bars);

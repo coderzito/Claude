@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { usePreferences } from "../context/PreferencesContext";
 import { Screen, Card, Button, Segmented, SwitchRow } from "../components/ui";
 import { SegmentedBar } from "../components/Progress";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Settings">;
 
@@ -24,6 +24,7 @@ const REMINDER_HOURS: { label: string; value: number }[] = [
 ];
 
 function SectionLabel({ children }: { children: string }) {
+  const theme = useTheme();
   return (
     <Text style={{ color: theme.faint, fontSize: 13, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: theme.space.sm }}>
       {children}
@@ -32,6 +33,7 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default function SettingsScreen({ navigation }: Props) {
+  const theme = useTheme();
   const { logout } = useAuth();
   const { prefs, setPref, loaded } = usePreferences();
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -65,6 +67,22 @@ export default function SettingsScreen({ navigation }: Props) {
                 </Text>
               </View>
             )}
+          </Card>
+        </View>
+
+        <View style={{ marginBottom: theme.space.xl }}>
+          <SectionLabel>Appearance</SectionLabel>
+          <Card>
+            <Text style={{ color: theme.text, fontSize: 15, fontWeight: "600", marginBottom: theme.space.sm }}>Theme</Text>
+            <Segmented
+              options={[
+                { label: "System", value: "system" as const },
+                { label: "Light", value: "light" as const },
+                { label: "Dark", value: "dark" as const },
+              ]}
+              value={prefs.themeMode}
+              onChange={(v) => setPref("themeMode", v)}
+            />
           </Card>
         </View>
 

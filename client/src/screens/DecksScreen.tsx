@@ -5,12 +5,13 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api, API_URL, getToken } from "../api/client";
 import { Screen, Card, Button } from "../components/ui";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { Deck } from "../api/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Decks">;
 
 export default function DecksScreen({ navigation }: Props) {
+  const theme = useTheme();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);

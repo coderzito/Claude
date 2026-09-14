@@ -6,7 +6,7 @@ import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
 import { Screen, Button, Card } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import { usePreferences, TEXT_SIZE_SCALE, SPEECH_RATE } from "../context/PreferencesContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Chapter">;
@@ -42,6 +42,7 @@ function chunkBody(bodyMd: string): string[] {
 // studySecondsRemaining on every poll rather than trusted on its own.
 export default function ChapterScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
+  const theme = useTheme();
   const { prefs } = usePreferences();
   const textScale = TEXT_SIZE_SCALE[prefs.textSize];
   const [bodyMd, setBodyMd] = useState("");
@@ -156,7 +157,16 @@ export default function ChapterScreen({ route, navigation }: Props) {
               <View style={{ marginTop: theme.space.md, gap: theme.space.sm }}>
                 {keyPoints.map((kp) => (
                   <View key={kp.id} style={{ flexDirection: "row" }}>
-                    <View style={styles.bullet} />
+                    <View
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: theme.accent,
+                        marginTop: 7,
+                        marginRight: theme.space.sm,
+                      }}
+                    />
                     <Text style={{ color: theme.subtext, flex: 1, fontSize: 14 * textScale, lineHeight: 20 * textScale }}>
                       {kp.claim}
                     </Text>
@@ -170,7 +180,14 @@ export default function ChapterScreen({ route, navigation }: Props) {
         <View style={{ gap: theme.space.lg }}>
           {chunks.map((chunk, i) => (
             <View key={i} style={{ flexDirection: "row" }}>
-              <View style={styles.chunkBar} />
+              <View
+                style={{
+                  width: 3,
+                  borderRadius: 2,
+                  backgroundColor: theme.border,
+                  marginRight: theme.space.md,
+                }}
+              />
               <Text style={{ color: theme.text, fontSize: 16 * textScale, lineHeight: 24 * textScale, flex: 1 }}>
                 {chunk}
               </Text>
@@ -188,20 +205,3 @@ export default function ChapterScreen({ route, navigation }: Props) {
     </Screen>
   );
 }
-
-const styles = {
-  bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.accent,
-    marginTop: 7,
-    marginRight: theme.space.sm,
-  },
-  chunkBar: {
-    width: 3,
-    borderRadius: 2,
-    backgroundColor: theme.border,
-    marginRight: theme.space.md,
-  },
-} as const;

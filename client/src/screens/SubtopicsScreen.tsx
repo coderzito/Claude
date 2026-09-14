@@ -4,12 +4,13 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
 import { Screen, Card, Button } from "../components/ui";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { Subtopic } from "../api/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Subtopics">;
 
 export default function SubtopicsScreen({ route, navigation }: Props) {
+  const theme = useTheme();
   const { deckId, deckTitle } = route.params;
   const [rolled, setRolled] = useState<Subtopic | null>(null);
   const [rolling, setRolling] = useState(false);

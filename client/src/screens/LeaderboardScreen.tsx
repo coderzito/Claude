@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Text, FlatList, View, Alert } from "react-native";
 import { api } from "../api/client";
 import { Screen, Card, Field, Button } from "../components/ui";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { LeaderboardEntry } from "../api/types";
 
 export default function LeaderboardScreen() {
+  const theme = useTheme();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [friendEmail, setFriendEmail] = useState("");

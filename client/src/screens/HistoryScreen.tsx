@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, FlatList, View } from "react-native";
 import { api } from "../api/client";
 import { Screen, Card } from "../components/ui";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 import type { SessionSummary } from "../api/types";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -18,6 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
 // product's retention hook, so it always shows every session regardless of
 // leaderboard privacy.
 export default function HistoryScreen() {
+  const theme = useTheme();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -5,11 +5,12 @@ import type { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuth } from "../context/AuthContext";
 import { Screen, Field, Button } from "../components/ui";
 import { ApiError } from "../api/client";
-import { theme } from "../theme";
+import { useTheme } from "../context/ThemeContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
+  const theme = useTheme();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

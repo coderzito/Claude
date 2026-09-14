@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 
 export type TextSize = "small" | "default" | "large";
 export type SpeechSpeed = "slower" | "normal" | "faster";
+export type ThemeMode = "system" | "light" | "dark";
 
 export interface Preferences {
   textSize: TextSize;
@@ -12,6 +13,7 @@ export interface Preferences {
   reduceMotion: boolean;
   reminderEnabled: boolean;
   reminderHour: number; // 24h, local device time
+  themeMode: ThemeMode;
 }
 
 const DEFAULTS: Preferences = {
@@ -21,6 +23,7 @@ const DEFAULTS: Preferences = {
   reduceMotion: false,
   reminderEnabled: false,
   reminderHour: 18,
+  themeMode: "system",
 };
 
 export const TEXT_SIZE_SCALE: Record<TextSize, number> = { small: 0.88, default: 1, large: 1.2 };
