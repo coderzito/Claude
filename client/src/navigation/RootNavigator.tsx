@@ -75,7 +75,7 @@ export default function RootNavigator() {
               component={HomeScreen}
               options={({ navigation }) => ({
                 title: "Passion Study",
-                headerRight: () => (
+                headerLeft: () => (
                   <Pressable onPress={() => navigation.navigate("Settings")} hitSlop={12}>
                     <Text style={{ color: theme.accent, fontWeight: "600", fontSize: 15 }}>Settings</Text>
                   </Pressable>
