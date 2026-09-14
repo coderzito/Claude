@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Text, View, Alert, AppState } from "react-native";
-import { Audio } from "expo-av";
+import {
+  useAudioRecorder,
+  useAudioRecorderState,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from "expo-audio";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api, API_URL, getToken } from "../api/client";
@@ -15,44 +21,30 @@ const MAX_SECONDS = 300;
 
 type Phase = "preparing" | "recording" | "uploading" | "processing";
 
+const recordingOptions = { ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true };
+
 export default function RecordingScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
   const [phase, setPhase] = useState<Phase>("preparing");
-  const [elapsed, setElapsed] = useState(0);
-  const [metering, setMetering] = useState<number | null>(null);
-  const recordingRef = useRef<Audio.Recording | null>(null);
   const stoppedRef = useRef(false);
+  const recorder = useAudioRecorder(recordingOptions);
+  const recorderState = useAudioRecorderState(recorder, 250);
+  const elapsed = Math.floor(recorderState.durationMillis / 1000);
 
   useEffect(() => {
     let cancelled = false;
 
     async function begin() {
-      const permission = await Audio.requestPermissionsAsync();
+      const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted) {
         Alert.alert("Microphone needed", "Cold Call needs mic access to record your explanation.");
         navigation.goBack();
         return;
       }
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-
-      const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync({
-        ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
-        isMeteringEnabled: true,
-      });
-      recording.setOnRecordingStatusUpdate((status) => {
-        if (status.isRecording) {
-          setElapsed(Math.floor(status.durationMillis / 1000));
-          if (typeof status.metering === "number") setMetering(status.metering);
-        }
-      });
-      recording.setProgressUpdateInterval(250);
-      await recording.startAsync();
-      if (cancelled) {
-        await recording.stopAndUnloadAsync();
-        return;
-      }
-      recordingRef.current = recording;
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await recorder.prepareToRecordAsync();
+      if (cancelled) return;
+      recorder.record();
       setPhase("recording");
     }
 
@@ -89,13 +81,11 @@ export default function RecordingScreen({ route, navigation }: Props) {
   async function stopAndSubmit() {
     if (stoppedRef.current) return;
     stoppedRef.current = true;
-    const recording = recordingRef.current;
-    if (!recording) return;
 
     setPhase("uploading");
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
+      await recorder.stop();
+      const uri = recorder.uri;
       if (!uri) throw new Error("no_uri");
 
       const form = new FormData();
@@ -154,7 +144,7 @@ export default function RecordingScreen({ route, navigation }: Props) {
             <Text style={{ color: theme.subtext, marginTop: 8, marginBottom: 24 }}>
               {canStop ? "You can stop anytime" : `${remainingToMin}s until you can stop`}
             </Text>
-            <LevelMeter meteringDb={metering} />
+            <LevelMeter meteringDb={recorderState.metering ?? null} />
           </>
         )}
 

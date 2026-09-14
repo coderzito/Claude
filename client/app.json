@@ -34,6 +34,9 @@
     },
     "updates": {
       "url": "https://u.expo.dev/86a51df1-b181-4bda-95a5-41a1488fa573"
-    }
+    },
+    "plugins": [
+      "expo-audio"
+    ]
   }
 }

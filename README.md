@@ -5,9 +5,10 @@ then record a 2-5 minute spoken explanation. The app grades the speech against t
 chapter it generated, because it holds the chapter's key points as structured data
 from the same generation call.
 
-- **Client**: Expo (React Native) — installs to your phone's home screen like a real
-  app (via Expo Go while developing, or a standalone build). Uses `expo-av` for
-  recording with a live level meter.
+- **Client**: Expo (React Native), SDK 57 — installs to your phone's home screen like
+  a real app (via Expo Go while developing, or a standalone build). Uses `expo-audio`
+  for recording with a live level meter. Published via EAS Update, so it's openable
+  from the Expo Go app's Projects tab without a dev machine running.
 - **Server**: Node + Express + Postgres. Audio lives in S3-compatible object storage
   (MinIO locally), never in the database. Transcription and grading always run as
   background jobs, polled from a `jobs` table — never inline in a request.
@@ -90,11 +91,12 @@ local dev. For a real standalone install (own icon, no Expo Go wrapper), build w
   `GROQ_GENERATION_MODEL` for a larger Groq-hosted model, or repoint
   `generation.ts`/`grading.ts` at a different provider, if that matters more
   than cost later.
-- `npm audit` flags vulnerabilities inside Expo SDK 51's own CLI tooling
-  (`node_modules/tar`, `uuid` via `@expo/bunyan`) — these are transitive
-  dev-time dependencies of the `expo` CLI, not code shipped to the phone.
-  Upgrading past them means moving to a newer Expo SDK, which is a larger,
-  separate migration.
+- `npm audit` flags moderate vulnerabilities in `decode-uri-component` (pulled in
+  transitively by `@react-navigation/core`'s `query-string` dependency, with no
+  fix available upstream as of SDK 57) and in the `expo` CLI's own dev-time
+  tooling (`xcode`/`@expo/config-plugins`). The react-navigation one is a ReDoS
+  in deep-link query parsing; this app never wires up a `linking` config, so
+  that code path isn't exercised. The CLI-tooling ones don't ship to the phone.
 - Everything explicitly out of scope in the build brief (hostile Q&A follow-ups,
   leagues, group boards, bilingual mode, instructor dashboard, payments) is not
   built.

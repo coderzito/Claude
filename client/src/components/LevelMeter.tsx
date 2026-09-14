@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { theme } from "../theme";
 
-// expo-av reports metering in dBFS, roughly -160 (silence) to 0 (peak).
+// expo-audio reports metering in dBFS, roughly -160 (silence) to 0 (peak).
 // Map that to a 0-1 fill so the user can see the mic is actually picking them up.
 function normalize(db: number): number {
   const min = -60;
