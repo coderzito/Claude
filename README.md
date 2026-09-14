@@ -14,11 +14,11 @@ from the same generation call.
 
 ## Architecture notes (from the build brief)
 
-- **Generation**: one Anthropic call per subtopic returns the chapter markdown *and*
+- **Generation**: one Groq call per subtopic returns the chapter markdown *and*
   its `key_points` together (`server/src/services/generation.ts`), cached by
   `(subtopic_id, model_version)` and reused across every user. Key points are never
   generated in a second call, so they can't drift from the text.
-- **Grading**: after transcription, one structured Anthropic call
+- **Grading**: after transcription, one structured Groq call
   (`server/src/services/grading.ts`) returns accuracy/structure/delivery plus which
   key points were hit and any contradictions. Coverage is computed server-side from
   key-point hits and weights — never asked of the model as a free number. Weights
@@ -43,7 +43,7 @@ from the same generation call.
 ## Running it locally
 
 ```bash
-cp .env.example .env        # fill in ANTHROPIC_API_KEY and OPENAI_API_KEY at minimum
+cp .env.example .env        # fill in GROQ_API_KEY at minimum (free, no card — console.groq.com)
 docker compose up -d        # postgres + minio
 npm install --prefix server
 npm run db:migrate          # applies db/schema.sql
@@ -73,14 +73,23 @@ local dev. For a real standalone install (own icon, no Expo Go wrapper), build w
 
 ### Required API keys
 
-- `ANTHROPIC_API_KEY` — chapter generation and grading (structured tool-call JSON).
-- `OPENAI_API_KEY` — transcription (Whisper, `verbose_json` for segment timestamps
-  used in the script-reading heuristic). Swappable: the whole integration is one
+- `GROQ_API_KEY` — the only key needed. Free tier, no card required
+  (console.groq.com/keys). Powers chapter generation, grading (both structured
+  tool-call JSON), and transcription (Whisper `verbose_json`, for the
+  segment timestamps the script-reading heuristic needs) via Groq's
+  OpenAI-compatible API. Swappable: generation/grading live in
+  `server/src/services/generation.ts` + `grading.ts`, transcription in a single
   `transcribeAudio()` function in `server/src/services/transcription.ts`.
 
 ### Known gaps for a v1 demo
 
 - Friending is a single-step mutual add by email (no request/accept flow).
+- Chapter writing and grading run on Groq's free-tier `llama-3.3-70b-versatile`
+  rather than a frontier model, since the goal here was $0 to run. Quality is
+  decent but noticeably rougher than Claude/GPT-4-class output; swap
+  `GROQ_GENERATION_MODEL` for a larger Groq-hosted model, or repoint
+  `generation.ts`/`grading.ts` at a different provider, if that matters more
+  than cost later.
 - `npm audit` flags vulnerabilities inside Expo SDK 51's own CLI tooling
   (`node_modules/tar`, `uuid` via `@expo/bunyan`) — these are transitive
   dev-time dependencies of the `expo` CLI, not code shipped to the phone.

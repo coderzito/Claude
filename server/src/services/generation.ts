@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { config } from "../config.js";
 
-const client = new Anthropic({ apiKey: config.anthropic.apiKey });
+const client = new OpenAI({ apiKey: config.groq.apiKey, baseURL: config.groq.baseUrl });
 
 export interface KeyPoint {
   id: string;
@@ -15,36 +15,48 @@ export interface GeneratedChapter {
   key_points: KeyPoint[];
 }
 
-const chapterTool: Anthropic.Tool = {
-  name: "emit_chapter",
-  description: "Return the generated study chapter and its structured key points together.",
-  input_schema: {
-    type: "object",
-    properties: {
-      body_md: {
-        type: "string",
-        description:
-          "The chapter body in markdown. Number each paragraph's content so source_line references make sense; " +
-          "write it as plain prose lines, one idea per line where practical, so line numbers map cleanly to claims.",
-      },
-      key_points: {
-        type: "array",
-        description: "Every claim a correct spoken explanation must cover.",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            claim: { type: "string" },
-            weight: { type: "integer", minimum: 1, maximum: 5 },
-            source_line: { type: "integer", description: "1-indexed line number in body_md this claim comes from" },
+const chapterTool: OpenAI.Chat.Completions.ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "emit_chapter",
+    description: "Return the generated study chapter and its structured key points together.",
+    parameters: {
+      type: "object",
+      properties: {
+        body_md: {
+          type: "string",
+          description:
+            "The chapter body in markdown. Number each paragraph's content so source_line references make sense; " +
+            "write it as plain prose lines, one idea per line where practical, so line numbers map cleanly to claims.",
+        },
+        key_points: {
+          type: "array",
+          description: "Every claim a correct spoken explanation must cover.",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              claim: { type: "string" },
+              weight: { type: "integer", minimum: 1, maximum: 5 },
+              source_line: { type: "integer", description: "1-indexed line number in body_md this claim comes from" },
+            },
+            required: ["id", "claim", "weight", "source_line"],
           },
-          required: ["id", "claim", "weight", "source_line"],
         },
       },
+      required: ["body_md", "key_points"],
     },
-    required: ["body_md", "key_points"],
   },
 };
+
+function extractToolArgs<T>(completion: OpenAI.Chat.Completions.ChatCompletion, toolName: string): T {
+  const toolCall = completion.choices[0]?.message?.tool_calls?.find(
+    (t): t is OpenAI.Chat.Completions.ChatCompletionMessageToolCall & { function: { name: string } } =>
+      t.function.name === toolName
+  );
+  if (!toolCall) throw new Error(`${toolName}_no_tool_call`);
+  return JSON.parse(toolCall.function.arguments) as T;
+}
 
 /**
  * One call per subtopic produces both the chapter and its key points, because a
@@ -52,11 +64,11 @@ const chapterTool: Anthropic.Tool = {
  * Callers are responsible for caching the result (see routes/chapters.ts).
  */
 export async function generateChapter(deckSubject: string, subtopicTitle: string, difficultyTier: string): Promise<GeneratedChapter> {
-  const message = await client.messages.create({
-    model: config.anthropic.generationModel,
+  const completion = await client.chat.completions.create({
+    model: config.groq.generationModel,
     max_tokens: 4096,
     tools: [chapterTool],
-    tool_choice: { type: "tool", name: "emit_chapter" },
+    tool_choice: { type: "function", function: { name: "emit_chapter" } },
     messages: [
       {
         role: "user",
@@ -69,33 +81,34 @@ export async function generateChapter(deckSubject: string, subtopicTitle: string
     ],
   });
 
-  const toolUse = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-  if (!toolUse) throw new Error("generation_no_tool_use");
-  const result = toolUse.input as GeneratedChapter;
+  const result = extractToolArgs<GeneratedChapter>(completion, "emit_chapter");
   if (!result.body_md || !Array.isArray(result.key_points)) throw new Error("generation_malformed_output");
   return result;
 }
 
-const subtopicsTool: Anthropic.Tool = {
-  name: "emit_subtopics",
-  description: "Return a list of study subtopics extracted from the syllabus.",
-  input_schema: {
-    type: "object",
-    properties: {
-      subject: { type: "string" },
-      subtopics: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            difficulty_tier: { type: "string", enum: ["intro", "core", "advanced"] },
+const subtopicsTool: OpenAI.Chat.Completions.ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "emit_subtopics",
+    description: "Return a list of study subtopics extracted from the syllabus.",
+    parameters: {
+      type: "object",
+      properties: {
+        subject: { type: "string" },
+        subtopics: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              difficulty_tier: { type: "string", enum: ["intro", "core", "advanced"] },
+            },
+            required: ["title", "difficulty_tier"],
           },
-          required: ["title", "difficulty_tier"],
         },
       },
+      required: ["subject", "subtopics"],
     },
-    required: ["subject", "subtopics"],
   },
 };
 
@@ -106,11 +119,11 @@ export interface ExtractedSubtopic {
 
 export async function extractSubtopicsFromSyllabus(syllabusText: string): Promise<{ subject: string; subtopics: ExtractedSubtopic[] }> {
   const truncated = syllabusText.slice(0, 20000);
-  const message = await client.messages.create({
-    model: config.anthropic.generationModel,
+  const completion = await client.chat.completions.create({
+    model: config.groq.generationModel,
     max_tokens: 2048,
     tools: [subtopicsTool],
-    tool_choice: { type: "tool", name: "emit_subtopics" },
+    tool_choice: { type: "function", function: { name: "emit_subtopics" } },
     messages: [
       {
         role: "user",
@@ -122,7 +135,5 @@ export async function extractSubtopicsFromSyllabus(syllabusText: string): Promis
     ],
   });
 
-  const toolUse = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-  if (!toolUse) throw new Error("extraction_no_tool_use");
-  return toolUse.input as { subject: string; subtopics: ExtractedSubtopic[] };
+  return extractToolArgs<{ subject: string; subtopics: ExtractedSubtopic[] }>(completion, "emit_subtopics");
 }

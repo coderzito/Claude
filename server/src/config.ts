@@ -20,15 +20,15 @@ export const config = {
     forcePathStyle: (process.env.S3_FORCE_PATH_STYLE ?? "true") === "true",
   },
 
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    generationModel: process.env.GENERATION_MODEL ?? "claude-sonnet-5",
-    modelVersion: process.env.MODEL_VERSION ?? "claude-sonnet-5-v1",
-  },
-
-  openai: {
-    apiKey: process.env.OPENAI_API_KEY ?? "",
-    transcriptionModel: process.env.TRANSCRIPTION_MODEL ?? "whisper-1",
+  // Groq's API is OpenAI-compatible, so the same `openai` SDK client is reused
+  // for chat (generation/grading) and audio (transcription), just pointed at
+  // Groq's base URL. Free tier, no payment method required.
+  groq: {
+    apiKey: process.env.GROQ_API_KEY ?? "",
+    baseUrl: process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1",
+    generationModel: process.env.GROQ_GENERATION_MODEL ?? "llama-3.3-70b-versatile",
+    modelVersion: process.env.MODEL_VERSION ?? "groq-llama-3.3-70b-v1",
+    transcriptionModel: process.env.GROQ_TRANSCRIPTION_MODEL ?? "whisper-large-v3",
   },
 
   jwt: {

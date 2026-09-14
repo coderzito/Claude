@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { toFile } from "openai/uploads";
 import { config } from "../config.js";
 
-const client = new OpenAI({ apiKey: config.openai.apiKey });
+const client = new OpenAI({ apiKey: config.groq.apiKey, baseURL: config.groq.baseUrl });
 
 export interface TranscriptSegment {
   start: number;
@@ -19,7 +19,7 @@ export async function transcribeAudio(buffer: Buffer, filename: string): Promise
   const file = await toFile(buffer, filename);
   const response = await client.audio.transcriptions.create({
     file,
-    model: config.openai.transcriptionModel,
+    model: config.groq.transcriptionModel,
     response_format: "verbose_json",
     timestamp_granularities: ["segment"],
   });

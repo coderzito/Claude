@@ -1,8 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { config } from "../config.js";
 import type { KeyPoint } from "./generation.js";
 
-const client = new Anthropic({ apiKey: config.anthropic.apiKey });
+const client = new OpenAI({ apiKey: config.groq.apiKey, baseURL: config.groq.baseUrl });
 
 export interface KeyPointHit {
   id: string;
@@ -23,42 +23,45 @@ export interface GradingResult {
   contradictions: Contradiction[];
 }
 
-const gradingTool: Anthropic.Tool = {
-  name: "emit_grade",
-  description: "Grade a spoken explanation against the chapter's key points.",
-  input_schema: {
-    type: "object",
-    properties: {
-      accuracy: { type: "integer", minimum: 0, maximum: 100, description: "How factually correct the claims made were, independent of coverage" },
-      structure: { type: "integer", minimum: 0, maximum: 100, description: "How logically organized the explanation was" },
-      delivery: { type: "integer", minimum: 0, maximum: 100, description: "Clarity, pacing, confidence of the spoken delivery" },
-      key_points: {
-        type: "array",
-        description: "One entry per key point id given, in the same order, saying whether it was covered.",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            hit: { type: "boolean" },
-            evidence: { type: "string", description: "Quote or paraphrase from the transcript, or empty string if not hit" },
+const gradingTool: OpenAI.Chat.Completions.ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "emit_grade",
+    description: "Grade a spoken explanation against the chapter's key points.",
+    parameters: {
+      type: "object",
+      properties: {
+        accuracy: { type: "integer", minimum: 0, maximum: 100, description: "How factually correct the claims made were, independent of coverage" },
+        structure: { type: "integer", minimum: 0, maximum: 100, description: "How logically organized the explanation was" },
+        delivery: { type: "integer", minimum: 0, maximum: 100, description: "Clarity, pacing, confidence of the spoken delivery" },
+        key_points: {
+          type: "array",
+          description: "One entry per key point id given, in the same order, saying whether it was covered.",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              hit: { type: "boolean" },
+              evidence: { type: "string", description: "Quote or paraphrase from the transcript, or empty string if not hit" },
+            },
+            required: ["id", "hit", "evidence"],
           },
-          required: ["id", "hit", "evidence"],
+        },
+        contradictions: {
+          type: "array",
+          description: "Claims in the transcript that directly contradict the source chapter.",
+          items: {
+            type: "object",
+            properties: {
+              claim: { type: "string" },
+              source_line: { type: "integer" },
+            },
+            required: ["claim", "source_line"],
+          },
         },
       },
-      contradictions: {
-        type: "array",
-        description: "Claims in the transcript that directly contradict the source chapter.",
-        items: {
-          type: "object",
-          properties: {
-            claim: { type: "string" },
-            source_line: { type: "integer" },
-          },
-          required: ["claim", "source_line"],
-        },
-      },
+      required: ["accuracy", "structure", "delivery", "key_points", "contradictions"],
     },
-    required: ["accuracy", "structure", "delivery", "key_points", "contradictions"],
   },
 };
 
@@ -68,11 +71,11 @@ const gradingTool: Anthropic.Tool = {
  * the structured data the chapter was generated with.
  */
 export async function gradeTranscript(chapterBodyMd: string, keyPoints: KeyPoint[], transcript: string): Promise<GradingResult> {
-  const message = await client.messages.create({
-    model: config.anthropic.generationModel,
+  const completion = await client.chat.completions.create({
+    model: config.groq.generationModel,
     max_tokens: 4096,
     tools: [gradingTool],
-    tool_choice: { type: "tool", name: "emit_grade" },
+    tool_choice: { type: "function", function: { name: "emit_grade" } },
     messages: [
       {
         role: "user",
@@ -86,9 +89,9 @@ export async function gradeTranscript(chapterBodyMd: string, keyPoints: KeyPoint
     ],
   });
 
-  const toolUse = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-  if (!toolUse) throw new Error("grading_no_tool_use");
-  return toolUse.input as GradingResult;
+  const toolCall = completion.choices[0]?.message?.tool_calls?.find((t) => t.function.name === "emit_grade");
+  if (!toolCall) throw new Error("grading_no_tool_call");
+  return JSON.parse(toolCall.function.arguments) as GradingResult;
 }
 
 export interface DeckWeights {

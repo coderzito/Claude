@@ -20,7 +20,7 @@ export interface Chapter {
 export async function getOrCreateChapter(subtopicId: string): Promise<Chapter> {
   const cached = await query<Chapter>(
     "select * from chapters where subtopic_id = $1 and model_version = $2",
-    [subtopicId, config.anthropic.modelVersion]
+    [subtopicId, config.groq.modelVersion]
   );
   if (cached.rows[0]) return cached.rows[0];
 
@@ -40,7 +40,7 @@ export async function getOrCreateChapter(subtopicId: string): Promise<Chapter> {
      values ($1, $2, $3, $4)
      on conflict (subtopic_id, model_version) do update set body_md = excluded.body_md
      returning *`,
-    [subtopicId, generated.body_md, JSON.stringify(generated.key_points), config.anthropic.modelVersion]
+    [subtopicId, generated.body_md, JSON.stringify(generated.key_points), config.groq.modelVersion]
   );
   return inserted.rows[0];
 }
