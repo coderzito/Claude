@@ -1,0 +1,13 @@
+{
+  "name": "cold-call",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run start",
+    "build:server": "npm --prefix server run build",
+    "db:migrate": "npm --prefix server run migrate",
+    "db:seed": "npm --prefix server run migrate -- --seed",
+    "worker": "npm --prefix server run worker"
+  }
+}
