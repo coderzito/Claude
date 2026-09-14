@@ -17,10 +17,23 @@
     },
     "android": {
       "package": "com.coldcall.app",
-      "permissions": ["RECORD_AUDIO"]
+      "permissions": [
+        "RECORD_AUDIO",
+        "RECORD_AUDIO"
+      ]
     },
     "extra": {
-      "apiUrl": "https://claude-z1b5uq.fly.dev"
+      "apiUrl": "https://claude-z1b5uq.fly.dev",
+      "eas": {
+        "projectId": "86a51df1-b181-4bda-95a5-41a1488fa573"
+      }
+    },
+    "owner": "trevorzito",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/86a51df1-b181-4bda-95a5-41a1488fa573"
     }
   }
 }
