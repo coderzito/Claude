@@ -27,10 +27,11 @@ not hardcoded to the build brief's original 15 min / 2-5 min.
   key-point hits and weights — never asked of the model as a free number. Weights
   are per-deck config (`deck_configs` table), not hardcoded.
 - **Anti-abuse**: study and speech timers are server timestamps
-  (`study_started_at`, `speech_started_at`); the client's countdown is cosmetic. A
-  session is rejected if speech starts less than `MIN_STUDY_MINUTES_BEFORE_SPEECH`
-  after study starts, or if the recorded duration falls outside the configured
-  min/max. Only one audio upload is
+  (`study_started_at`, `speech_started_at`); the client's countdown is cosmetic.
+  `MIN_STUDY_MINUTES_BEFORE_SPEECH` defaults to 0 — the study timer is a
+  suggestion, not a gate, so you can jump straight to recording; set it above 0
+  to require studying for at least that long first. A session is still rejected
+  if the recorded duration falls outside the configured min/max. Only one audio upload is
   accepted per session (the status flip to `transcribing` makes a second upload
   attempt fail), and the RN client foreground-only recording flow rules out
   pause/resume multi-blob uploads at the source. Likely script-reading (low pause

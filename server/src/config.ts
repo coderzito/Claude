@@ -42,7 +42,7 @@ export const config = {
   app: {
     freeTierDailySessions: Number(process.env.FREE_TIER_DAILY_SESSIONS ?? 3),
     studyMinutes: Number(process.env.STUDY_MINUTES ?? 4),
-    minStudyMinutesBeforeSpeech: Number(process.env.MIN_STUDY_MINUTES_BEFORE_SPEECH ?? 3),
+    minStudyMinutesBeforeSpeech: Number(process.env.MIN_STUDY_MINUTES_BEFORE_SPEECH ?? 0),
     speechMinSeconds: Number(process.env.SPEECH_MIN_SECONDS ?? 60),
     speechMaxSeconds: Number(process.env.SPEECH_MAX_SECONDS ?? 120),
     weeklyQuotaSessions: 4,
