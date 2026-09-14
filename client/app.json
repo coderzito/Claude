@@ -20,7 +20,7 @@
       "permissions": ["RECORD_AUDIO"]
     },
     "extra": {
-      "apiUrl": "http://localhost:8080"
+      "apiUrl": "https://claude-z1b5uq.fly.dev"
     }
   }
 }

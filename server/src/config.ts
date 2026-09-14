@@ -11,13 +11,16 @@ export const config = {
   clientOrigin: process.env.CLIENT_ORIGIN ?? "*",
   databaseUrl: required("DATABASE_URL", "postgres://coldcall:coldcall@localhost:5432/coldcall"),
 
+  // Accepts either the local MinIO naming (S3_*) or Fly's Tigris naming
+  // (AWS_*/BUCKET_NAME, set automatically by `fly storage create`), so the
+  // same code runs against docker-compose locally and Tigris in production.
   s3: {
-    endpoint: required("S3_ENDPOINT", "http://localhost:9000"),
-    region: process.env.S3_REGION ?? "us-east-1",
-    bucket: required("S3_BUCKET", "coldcall-audio"),
-    accessKey: required("S3_ACCESS_KEY", "coldcall"),
-    secretKey: required("S3_SECRET_KEY", "coldcall123"),
-    forcePathStyle: (process.env.S3_FORCE_PATH_STYLE ?? "true") === "true",
+    endpoint: process.env.AWS_ENDPOINT_URL_S3 ?? required("S3_ENDPOINT", "http://localhost:9000"),
+    region: process.env.AWS_REGION ?? process.env.S3_REGION ?? "us-east-1",
+    bucket: process.env.BUCKET_NAME ?? required("S3_BUCKET", "coldcall-audio"),
+    accessKey: process.env.AWS_ACCESS_KEY_ID ?? required("S3_ACCESS_KEY", "coldcall"),
+    secretKey: process.env.AWS_SECRET_ACCESS_KEY ?? required("S3_SECRET_KEY", "coldcall123"),
+    forcePathStyle: (process.env.S3_FORCE_PATH_STYLE ?? (process.env.AWS_ENDPOINT_URL_S3 ? "false" : "true")) === "true",
   },
 
   // Groq's API is OpenAI-compatible, so the same `openai` SDK client is reused
