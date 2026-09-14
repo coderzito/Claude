@@ -85,8 +85,16 @@ export default function RecordingScreen({ route, navigation }: Props) {
     setPhase("uploading");
     try {
       await recorder.stop();
-      const uri = recorder.uri;
-      if (!uri) throw new Error("no_uri");
+
+      // recorder.uri can lag slightly behind stop() resolving on some
+      // platforms; give the native side a beat, then fall back to the
+      // status object before giving up.
+      let uri = recorder.uri;
+      if (!uri) {
+        await new Promise((r) => setTimeout(r, 300));
+        uri = recorder.uri ?? recorder.getStatus().url;
+      }
+      if (!uri) throw new Error("Recording finished but no file was produced");
 
       const form = new FormData();
       form.append("file", { uri, name: "explanation.m4a", type: "audio/m4a" } as any);
@@ -103,13 +111,15 @@ export default function RecordingScreen({ route, navigation }: Props) {
           navigation.navigate("Home");
           return;
         }
-        throw new Error(body.error ?? "upload_failed");
+        throw new Error(body.error ?? `upload_failed (HTTP ${res.status})`);
       }
 
       setPhase("processing");
       pollForResult();
-    } catch {
-      Alert.alert("Upload failed", "Couldn't submit your recording.");
+    } catch (err) {
+      console.error("stopAndSubmit failed:", err);
+      const detail = err instanceof Error ? err.message : String(err);
+      Alert.alert("Upload failed", `Couldn't submit your recording. (${detail})`);
       navigation.navigate("Home");
     }
   }
