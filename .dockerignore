@@ -1,0 +1,9 @@
+node_modules
+client/
+.git
+.secrets
+.expo
+.expo-shared
+*.log
+.DS_Store
+server/dist
