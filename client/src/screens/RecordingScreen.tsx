@@ -7,10 +7,12 @@ import {
   requestRecordingPermissionsAsync,
   setAudioModeAsync,
 } from "expo-audio";
+import * as Haptics from "expo-haptics";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api, API_URL, getToken } from "../api/client";
 import { Screen, Button } from "../components/ui";
+import { ProgressRing } from "../components/Progress";
 import LevelMeter from "../components/LevelMeter";
 import { theme } from "../theme";
 
@@ -77,6 +79,17 @@ export default function RecordingScreen({ route, navigation }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elapsed, phase]);
+
+  // A tactile cue the instant it's OK to stop, so you don't have to keep
+  // reading the screen to know when you've crossed the line.
+  const wasStoppable = useRef(false);
+  useEffect(() => {
+    const stoppable = elapsed >= MIN_SECONDS;
+    if (stoppable && !wasStoppable.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    }
+    wasStoppable.current = stoppable;
+  }, [elapsed]);
 
   async function stopAndSubmit() {
     if (stoppedRef.current) return;
@@ -154,10 +167,17 @@ export default function RecordingScreen({ route, navigation }: Props) {
 
         {phase === "recording" && (
           <>
-            <Text style={{ color: theme.text, fontSize: 48, fontWeight: "700", fontVariant: ["tabular-nums"] }}>
-              {Math.floor(elapsed / 60)}:{(elapsed % 60).toString().padStart(2, "0")}
-            </Text>
-            <Text style={{ color: theme.subtext, marginTop: 8, marginBottom: 24 }}>
+            <ProgressRing
+              size={160}
+              strokeWidth={12}
+              progress={Math.min(1, elapsed / MAX_SECONDS)}
+              color={canStop ? theme.good : theme.accent}
+            >
+              <Text style={{ color: theme.text, fontSize: 34, fontWeight: "800", fontVariant: ["tabular-nums"] }}>
+                {Math.floor(elapsed / 60)}:{(elapsed % 60).toString().padStart(2, "0")}
+              </Text>
+            </ProgressRing>
+            <Text style={{ color: canStop ? theme.good : theme.subtext, marginTop: theme.space.lg, marginBottom: theme.space.xl, fontWeight: canStop ? "600" : "400" }}>
               {canStop ? "You can stop anytime" : `${remainingToMin}s until you can stop`}
             </Text>
             <LevelMeter meteringDb={recorderState.metering ?? null} />

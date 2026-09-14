@@ -93,7 +93,12 @@ sessionsRouter.get("/:id", async (req: AuthedRequest, res) => {
       speechStartedAt: session.speech_started_at,
       durationS: session.duration_s,
     },
-    chapter: { bodyMd: session.body_md },
+    chapter: {
+      bodyMd: session.body_md,
+      // Weight/source_line stay server-side for grading; the client only
+      // needs the claim text for a quick "what to cover" checklist.
+      keyPoints: (session.key_points as { id: string; claim: string }[]).map((kp) => ({ id: kp.id, claim: kp.claim })),
+    },
   });
 });
 

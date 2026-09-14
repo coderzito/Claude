@@ -3,7 +3,8 @@ import { Text, View, Alert, Pressable } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
-import { Screen, Field, Button } from "../components/ui";
+import { Screen, Field, Button, Divider } from "../components/ui";
+import { DieIcon } from "../components/DieIcon";
 import { theme } from "../theme";
 import type { Subtopic } from "../api/types";
 
@@ -60,20 +61,16 @@ export default function RollScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <Text style={{ color: theme.text, fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 8 }}>
-          🎲 Roll Random!
+        <Text style={{ color: theme.text, fontSize: 26, fontWeight: "800", textAlign: "center", marginBottom: theme.space.xs }}>
+          Roll Random
         </Text>
-        <Text style={{ color: theme.subtext, textAlign: "center", marginBottom: 24 }}>
+        <Text style={{ color: theme.subtext, textAlign: "center", marginBottom: theme.space.xl }}>
           Pulls from a wide mix of subjects — economics to astronomy to philosophy.
         </Text>
 
-        <Button title="Roll Random!" onPress={rollRandom} loading={busy === "roll"} disabled={busy === "custom"} />
+        <Button title="Roll Random!" icon={<DieIcon />} onPress={rollRandom} loading={busy === "roll"} disabled={busy === "custom"} />
 
-        <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 28 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: theme.border }} />
-          <Text style={{ color: theme.subtext, marginHorizontal: 12 }}>or</Text>
-          <View style={{ flex: 1, height: 1, backgroundColor: theme.border }} />
-        </View>
+        <Divider label="or" />
 
         <Field
           label="What do you want to study?"
@@ -85,7 +82,7 @@ export default function RollScreen({ navigation }: Props) {
         />
         <Button title="Start studying" onPress={startCustomTopic} loading={busy === "custom"} disabled={busy === "roll"} />
 
-        <Pressable onPress={() => navigation.navigate("Decks")} style={{ marginTop: 24 }}>
+        <Pressable onPress={() => navigation.navigate("Decks")} style={{ marginTop: theme.space.xl }}>
           <Text style={{ color: theme.subtext, textAlign: "center" }}>
             Or <Text style={{ color: theme.accent }}>browse decks</Text> (including your uploaded syllabi)
           </Text>

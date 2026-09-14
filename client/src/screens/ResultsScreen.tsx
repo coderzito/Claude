@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Text, ScrollView, View, ActivityIndicator } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Text, ScrollView, View, ActivityIndicator, Animated } from "react-native";
+import * as Haptics from "expo-haptics";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { api } from "../api/client";
 import { Screen, Card, Button } from "../components/ui";
+import { ProgressRing } from "../components/Progress";
 import { theme } from "../theme";
 import type { ScoreResult } from "../api/types";
 
@@ -19,6 +21,33 @@ function scoreColor(n: number): string {
   if (n >= 80) return theme.good;
   if (n >= 50) return theme.warn;
   return theme.bad;
+}
+
+function ScoreReveal({ total }: { total: number }) {
+  const scale = useRef(new Animated.Value(0.6)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Haptics.notificationAsync(
+      total >= 80
+        ? Haptics.NotificationFeedbackType.Success
+        : total >= 50
+          ? Haptics.NotificationFeedbackType.Warning
+          : Haptics.NotificationFeedbackType.Error
+    ).catch(() => {});
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 10 }).start();
+    Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Animated.View style={{ alignItems: "center", marginBottom: theme.space.xl, opacity, transform: [{ scale }] }}>
+      <ProgressRing size={148} strokeWidth={12} progress={Math.max(0, Math.min(1, total / 100))} color={scoreColor(total)}>
+        <Text style={{ color: scoreColor(total), fontSize: 40, fontWeight: "800" }}>{Math.round(total)}</Text>
+      </ProgressRing>
+      <Text style={{ color: theme.subtext, marginTop: theme.space.md }}>Total score</Text>
+    </Animated.View>
+  );
 }
 
 function Subscore({ label, value }: { label: string; value: number }) {
@@ -88,10 +117,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-        <Text style={{ color: theme.subtext, textAlign: "center" }}>Total score</Text>
-        <Text style={{ color: scoreColor(score.total), fontSize: 56, fontWeight: "800", textAlign: "center", marginBottom: 20 }}>
-          {Math.round(score.total)}
-        </Text>
+        <ScoreReveal total={score.total} />
 
         <Card style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: "row" }}>

@@ -10,7 +10,12 @@ not hardcoded to the build brief's original 15 min / 2-5 min.
 - **Client**: Expo (React Native), SDK 57 — installs to your phone's home screen like
   a real app (via Expo Go while developing, or a standalone build). Uses `expo-audio`
   for recording with a live level meter. Published via EAS Update, so it's openable
-  from the Expo Go app's Projects tab without a dev machine running.
+  from the Expo Go app's Projects tab without a dev machine running. Chapters render
+  as short spaced chunks rather than a dense paragraph, with a "cover these points"
+  checklist and a text-to-speech "Listen" option (`expo-speech`) — easier to hold
+  attention on than a wall of text. Circular progress rings (`react-native-svg`)
+  replace plain countdown digits, and `expo-haptics` gives a tactile pulse on every
+  button press plus the moment a recording crosses its minimum length.
 - **Server**: Node + Express + Postgres. Audio lives in S3-compatible object storage
   (MinIO locally), never in the database. Transcription and grading always run as
   background jobs, polled from a `jobs` table — never inline in a request.
