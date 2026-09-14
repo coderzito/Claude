@@ -17,10 +17,7 @@
     },
     "android": {
       "package": "com.coldcall.app",
-      "permissions": [
-        "RECORD_AUDIO",
-        "RECORD_AUDIO"
-      ]
+      "permissions": ["RECORD_AUDIO"]
     },
     "extra": {
       "apiUrl": "https://claude-z1b5uq.fly.dev",

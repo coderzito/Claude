@@ -7,10 +7,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  Switch,
   type TextInputProps,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { theme, shadow } from "../theme";
+import { usePreferences } from "../context/PreferencesContext";
 
 export function Button({
   title,
@@ -29,16 +31,19 @@ export function Button({
 }) {
   const isDisabled = disabled || loading;
   const scale = useRef(new Animated.Value(1)).current;
+  const { prefs } = usePreferences();
 
   function pressIn() {
+    if (prefs.reduceMotion) return;
     Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
   }
   function pressOut() {
+    if (prefs.reduceMotion) return;
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 6 }).start();
   }
   function handlePress() {
     if (isDisabled) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    if (prefs.hapticsEnabled) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     onPress();
   }
 
@@ -98,6 +103,76 @@ export function Card({ children, style, flat }: { children: React.ReactNode; sty
 
 export function Screen({ children, style }: { children: React.ReactNode; style?: object }) {
   return <View style={[styles.screen, style]}>{children}</View>;
+}
+
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { label: string; value: T }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  const { prefs } = usePreferences();
+  return (
+    <View style={{ flexDirection: "row", backgroundColor: theme.cardAlt, borderRadius: theme.radiusSm, padding: 3 }}>
+      {options.map((opt) => {
+        const active = opt.value === value;
+        return (
+          <Pressable
+            key={opt.value}
+            onPress={() => {
+              if (prefs.hapticsEnabled) Haptics.selectionAsync().catch(() => {});
+              onChange(opt.value);
+            }}
+            style={{
+              flex: 1,
+              paddingVertical: 9,
+              borderRadius: theme.radiusSm - 3,
+              alignItems: "center",
+              backgroundColor: active ? theme.accent : "transparent",
+            }}
+          >
+            <Text style={{ color: active ? "#0a0c10" : theme.subtext, fontWeight: active ? "700" : "500", fontSize: 13 }}>
+              {opt.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+export function SwitchRow({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string;
+  description?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const { prefs } = usePreferences();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View style={{ flex: 1, marginRight: theme.space.md }}>
+        <Text style={{ color: theme.text, fontSize: 15, fontWeight: "600" }}>{label}</Text>
+        {description && <Text style={{ color: theme.faint, fontSize: 13, marginTop: 2 }}>{description}</Text>}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={(v) => {
+          if (prefs.hapticsEnabled) Haptics.selectionAsync().catch(() => {});
+          onChange(v);
+        }}
+        trackColor={{ false: theme.track, true: theme.accentDim }}
+        thumbColor={value ? theme.accent : "#6b7280"}
+      />
+    </View>
+  );
 }
 
 export function Divider({ label }: { label?: string }) {

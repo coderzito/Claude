@@ -7,6 +7,7 @@ import { api } from "../api/client";
 import { Screen, Card, Button } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
 import { theme } from "../theme";
+import { usePreferences } from "../context/PreferencesContext";
 import type { ScoreResult } from "../api/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Results">;
@@ -24,19 +25,24 @@ function scoreColor(n: number): string {
 }
 
 function ScoreReveal({ total }: { total: number }) {
-  const scale = useRef(new Animated.Value(0.6)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const { prefs } = usePreferences();
+  const scale = useRef(new Animated.Value(prefs.reduceMotion ? 1 : 0.6)).current;
+  const opacity = useRef(new Animated.Value(prefs.reduceMotion ? 1 : 0)).current;
 
   useEffect(() => {
-    Haptics.notificationAsync(
-      total >= 80
-        ? Haptics.NotificationFeedbackType.Success
-        : total >= 50
-          ? Haptics.NotificationFeedbackType.Warning
-          : Haptics.NotificationFeedbackType.Error
-    ).catch(() => {});
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 10 }).start();
-    Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    if (prefs.hapticsEnabled) {
+      Haptics.notificationAsync(
+        total >= 80
+          ? Haptics.NotificationFeedbackType.Success
+          : total >= 50
+            ? Haptics.NotificationFeedbackType.Warning
+            : Haptics.NotificationFeedbackType.Error
+      ).catch(() => {});
+    }
+    if (!prefs.reduceMotion) {
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 10 }).start();
+      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

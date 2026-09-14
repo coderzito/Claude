@@ -7,6 +7,7 @@ import { api } from "../api/client";
 import { Screen, Button, Card } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
 import { theme } from "../theme";
+import { usePreferences, TEXT_SIZE_SCALE, SPEECH_RATE } from "../context/PreferencesContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Chapter">;
 
@@ -41,6 +42,8 @@ function chunkBody(bodyMd: string): string[] {
 // studySecondsRemaining on every poll rather than trusted on its own.
 export default function ChapterScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
+  const { prefs } = usePreferences();
+  const textScale = TEXT_SIZE_SCALE[prefs.textSize];
   const [bodyMd, setBodyMd] = useState("");
   const [keyPoints, setKeyPoints] = useState<{ id: string; claim: string }[]>([]);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
@@ -95,7 +98,7 @@ export default function ChapterScreen({ route, navigation }: Props) {
     if (!text) return;
     setSpeaking(true);
     Speech.speak(text, {
-      rate: 0.95,
+      rate: SPEECH_RATE[prefs.speechSpeed],
       onDone: () => setSpeaking(false),
       onStopped: () => setSpeaking(false),
       onError: () => setSpeaking(false),
@@ -154,7 +157,9 @@ export default function ChapterScreen({ route, navigation }: Props) {
                 {keyPoints.map((kp) => (
                   <View key={kp.id} style={{ flexDirection: "row" }}>
                     <View style={styles.bullet} />
-                    <Text style={{ color: theme.subtext, flex: 1, lineHeight: 20 }}>{kp.claim}</Text>
+                    <Text style={{ color: theme.subtext, flex: 1, fontSize: 14 * textScale, lineHeight: 20 * textScale }}>
+                      {kp.claim}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -166,7 +171,9 @@ export default function ChapterScreen({ route, navigation }: Props) {
           {chunks.map((chunk, i) => (
             <View key={i} style={{ flexDirection: "row" }}>
               <View style={styles.chunkBar} />
-              <Text style={{ color: theme.text, fontSize: 16, lineHeight: 24, flex: 1 }}>{chunk}</Text>
+              <Text style={{ color: theme.text, fontSize: 16 * textScale, lineHeight: 24 * textScale, flex: 1 }}>
+                {chunk}
+              </Text>
             </View>
           ))}
         </View>

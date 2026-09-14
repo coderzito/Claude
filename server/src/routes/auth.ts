@@ -2,19 +2,33 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { query } from "../db/pool.js";
+import { config } from "../config.js";
 import { signToken } from "../lib/jwt.js";
 import { requireAuth, type AuthedRequest } from "../middleware/auth.js";
 
 export const authRouter = Router();
 
 authRouter.get("/me", requireAuth, async (req: AuthedRequest, res) => {
-  const result = await query<{ id: string; email: string; display_name: string }>(
-    "select id, email, display_name from users where id = $1",
+  const result = await query<{
+    id: string;
+    email: string;
+    display_name: string;
+    free_tier_sessions_today: number;
+    free_tier_day: string;
+  }>(
+    "select id, email, display_name, free_tier_sessions_today, free_tier_day from users where id = $1",
     [req.userId]
   );
   const user = result.rows[0];
   if (!user) return res.status(404).json({ error: "not_found" });
-  res.json({ user: { id: user.id, email: user.email, displayName: user.display_name } });
+
+  const today = new Date().toISOString().slice(0, 10);
+  const sessionsToday = user.free_tier_day === today ? user.free_tier_sessions_today : 0;
+
+  res.json({
+    user: { id: user.id, email: user.email, displayName: user.display_name },
+    quota: { sessionsUsedToday: sessionsToday, dailyLimit: config.app.freeTierDailySessions },
+  });
 });
 
 const credentialsSchema = z.object({

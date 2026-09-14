@@ -14,7 +14,7 @@ import type { StreakStatus } from "../api/types";
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [streak, setStreak] = useState<StreakStatus | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -65,7 +65,6 @@ export default function HomeScreen({ navigation }: Props) {
           <Button title="Roll Random!" icon={<DieIcon />} onPress={() => navigation.navigate("Roll")} />
           <Button title="History" variant="secondary" onPress={() => navigation.navigate("History")} />
           <Button title="Friends leaderboard" variant="secondary" onPress={() => navigation.navigate("Leaderboard")} />
-          <Button title="Log out" variant="ghost" onPress={logout} />
         </View>
       </ScrollView>
     </Screen>

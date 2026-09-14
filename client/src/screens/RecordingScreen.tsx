@@ -15,6 +15,7 @@ import { Screen, Button } from "../components/ui";
 import { ProgressRing } from "../components/Progress";
 import LevelMeter from "../components/LevelMeter";
 import { theme } from "../theme";
+import { usePreferences } from "../context/PreferencesContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Recording">;
 
@@ -27,6 +28,7 @@ const recordingOptions = { ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: 
 
 export default function RecordingScreen({ route, navigation }: Props) {
   const { sessionId } = route.params;
+  const { prefs } = usePreferences();
   const [phase, setPhase] = useState<Phase>("preparing");
   const stoppedRef = useRef(false);
   const recorder = useAudioRecorder(recordingOptions);
@@ -85,10 +87,11 @@ export default function RecordingScreen({ route, navigation }: Props) {
   const wasStoppable = useRef(false);
   useEffect(() => {
     const stoppable = elapsed >= MIN_SECONDS;
-    if (stoppable && !wasStoppable.current) {
+    if (stoppable && !wasStoppable.current && prefs.hapticsEnabled) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     }
     wasStoppable.current = stoppable;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elapsed]);
 
   async function stopAndSubmit() {
