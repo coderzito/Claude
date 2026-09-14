@@ -7,3 +7,10 @@ client/
 *.log
 .DS_Store
 server/dist
+server/.build
+
+# Host-built artifacts the Dockerfile copies in (see server/Dockerfile) —
+# re-include despite the broader excludes above.
+!server/dist
+!server/.build/prod
+!server/.build/prod/node_modules
