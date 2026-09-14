@@ -8,9 +8,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Local dev runs this straight from src/db/ (repo root is 3 levels up); the
 // Docker image instead copies db/ next to dist/ (2 levels up from dist/db/).
 // Try both rather than hardcoding one layout.
-const candidateRoots = [path.resolve(__dirname, "../../../"), path.resolve(__dirname, "../../")];
-const root = candidateRoots.find((candidate) => existsSync(path.join(candidate, "db/schema.sql")));
-if (!root) throw new Error(`db/schema.sql not found near any of: ${candidateRoots.join(", ")}`);
+function resolveRoot(): string {
+  const candidates = [path.resolve(__dirname, "../../../"), path.resolve(__dirname, "../../")];
+  const found = candidates.find((candidate) => existsSync(path.join(candidate, "db/schema.sql")));
+  if (!found) throw new Error(`db/schema.sql not found near any of: ${candidates.join(", ")}`);
+  return found;
+}
+const root = resolveRoot();
 
 async function run() {
   const schema = readFileSync(path.join(root, "db/schema.sql"), "utf8");
