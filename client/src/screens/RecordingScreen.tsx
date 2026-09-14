@@ -96,8 +96,14 @@ export default function RecordingScreen({ route, navigation }: Props) {
       }
       if (!uri) throw new Error("Recording finished but no file was produced");
 
+      // RN's newer networking stack dropped support for the classic
+      // `{ uri, name, type }` FormData shorthand ("Unsupported FormDataPart
+      // implementation") — read the local file into a real Blob instead.
+      const fileResponse = await fetch(uri);
+      const blob = await fileResponse.blob();
+
       const form = new FormData();
-      form.append("file", { uri, name: "explanation.m4a", type: "audio/m4a" } as any);
+      form.append("file", blob, "explanation.m4a");
       const token = await getToken();
       const res = await fetch(`${API_URL}/sessions/${sessionId}/audio`, {
         method: "POST",
