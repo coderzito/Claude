@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
+import RollScreen from "../screens/RollScreen";
 import DecksScreen from "../screens/DecksScreen";
 import SubtopicsScreen from "../screens/SubtopicsScreen";
 import ChapterScreen from "../screens/ChapterScreen";
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
+  Roll: undefined;
   Decks: undefined;
   Subtopics: { deckId: string; deckTitle: string };
   Chapter: { sessionId: string };
@@ -46,7 +48,8 @@ export default function RootNavigator() {
         {user ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Cold Call" }} />
-            <Stack.Screen name="Decks" component={DecksScreen} options={{ title: "Pick a deck" }} />
+            <Stack.Screen name="Roll" component={RollScreen} options={{ title: "Roll" }} />
+            <Stack.Screen name="Decks" component={DecksScreen} options={{ title: "Browse decks" }} />
             <Stack.Screen name="Subtopics" component={SubtopicsScreen} options={{ title: "Roll" }} />
             <Stack.Screen name="Chapter" component={ChapterScreen} options={{ title: "Study", headerBackVisible: false }} />
             <Stack.Screen name="Recording" component={RecordingScreen} options={{ title: "Explain it", headerBackVisible: false }} />

@@ -18,10 +18,15 @@ create table if not exists decks (
   owner_id uuid references users(id) on delete cascade,
   title text not null,
   subject text not null,
-  source_type text not null check (source_type in ('seeded', 'syllabus')),
+  source_type text not null check (source_type in ('seeded', 'syllabus', 'custom')),
   visibility text not null default 'private' check (visibility in ('private', 'public')),
   created_at timestamptz not null default now()
 );
+
+-- source_type gained 'custom' after the initial deploy; re-widen the constraint
+-- on any existing table (a fresh create above already has it, so this is a no-op there).
+alter table decks drop constraint if exists decks_source_type_check;
+alter table decks add constraint decks_source_type_check check (source_type in ('seeded', 'syllabus', 'custom'));
 
 -- Per-deck grading weights (spec: "make the weights per-deck config, not hardcoded")
 create table if not exists deck_configs (
@@ -127,6 +132,9 @@ create table if not exists analytics_events (
 );
 
 create index if not exists idx_subtopics_deck on subtopics(deck_id);
+-- Lets seed.sql and the custom-topic endpoint use ON CONFLICT (deck_id, title)
+-- to stay re-runnable / dedupe re-typed topics instead of erroring or duplicating.
+create unique index if not exists idx_subtopics_deck_title on subtopics(deck_id, title);
 create index if not exists idx_chapters_subtopic on chapters(subtopic_id);
 create index if not exists idx_sessions_user on sessions(user_id, created_at desc);
 create index if not exists idx_jobs_poll on jobs(status, run_after);

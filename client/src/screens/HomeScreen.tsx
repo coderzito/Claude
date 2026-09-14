@@ -52,7 +52,7 @@ export default function HomeScreen({ navigation }: Props) {
         )}
 
         <View style={{ gap: 12 }}>
-          <Button title="Roll a subtopic" onPress={() => navigation.navigate("Decks")} />
+          <Button title="🎲 Roll Random!" onPress={() => navigation.navigate("Roll")} />
           <Button title="History" variant="secondary" onPress={() => navigation.navigate("History")} />
           <Button title="Friends leaderboard" variant="secondary" onPress={() => navigation.navigate("Leaderboard")} />
           <Button title="Log out" variant="secondary" onPress={logout} />

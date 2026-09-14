@@ -72,6 +72,23 @@ decksRouter.post("/syllabus", upload.single("file"), async (req: AuthedRequest, 
   res.status(201).json({ deckId, subject: extracted.subject, subtopicCount: extracted.subtopics.length });
 });
 
+// Roll Random: pick a subtopic from anywhere in the shared public pool (every
+// seeded deck plus every previously-typed custom topic), not scoped to one deck.
+decksRouter.post("/roll", async (req: AuthedRequest, res) => {
+  const result = await query<{ id: string; title: string; difficulty_tier: string }>(
+    `select s.id, s.title, s.difficulty_tier
+     from subtopics s join decks d on d.id = s.deck_id
+     where d.visibility = 'public'
+     order by random()
+     limit 1`
+  );
+  const subtopic = result.rows[0];
+  if (!subtopic) return res.status(404).json({ error: "no_subtopics" });
+
+  await query("update subtopics set times_rolled = times_rolled + 1 where id = $1", [subtopic.id]);
+  res.json({ subtopic });
+});
+
 // Roll: pick a random subtopic from the chosen deck.
 decksRouter.post("/:deckId/roll", async (req: AuthedRequest, res) => {
   const result = await query<{ id: string; title: string; difficulty_tier: string }>(

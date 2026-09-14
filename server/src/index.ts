@@ -4,6 +4,7 @@ import cors from "cors";
 import { config } from "./config.js";
 import { authRouter } from "./routes/auth.js";
 import { decksRouter } from "./routes/decks.js";
+import { subtopicsRouter } from "./routes/subtopics.js";
 import { sessionsRouter } from "./routes/sessions.js";
 import { streaksRouter } from "./routes/streaks.js";
 import { leaderboardRouter, friendsRouter } from "./routes/leaderboard.js";
@@ -17,6 +18,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/auth", authRouter);
 app.use("/decks", decksRouter);
+app.use("/subtopics", subtopicsRouter);
 app.use("/sessions", sessionsRouter);
 app.use("/streak", streaksRouter);
 app.use("/leaderboard", leaderboardRouter);
