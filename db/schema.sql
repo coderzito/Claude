@@ -2,7 +2,7 @@
 
 create extension if not exists "pgcrypto";
 
-create table users (
+create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   email text unique not null,
   password_hash text not null,
@@ -13,7 +13,7 @@ create table users (
   created_at timestamptz not null default now()
 );
 
-create table decks (
+create table if not exists decks (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid references users(id) on delete cascade,
   title text not null,
@@ -24,7 +24,7 @@ create table decks (
 );
 
 -- Per-deck grading weights (spec: "make the weights per-deck config, not hardcoded")
-create table deck_configs (
+create table if not exists deck_configs (
   deck_id uuid primary key references decks(id) on delete cascade,
   accuracy_weight int not null default 40,
   coverage_weight int not null default 25,
@@ -32,7 +32,7 @@ create table deck_configs (
   delivery_weight int not null default 15
 );
 
-create table subtopics (
+create table if not exists subtopics (
   id uuid primary key default gen_random_uuid(),
   deck_id uuid not null references decks(id) on delete cascade,
   title text not null,
@@ -42,7 +42,7 @@ create table subtopics (
 );
 
 -- One generation call produces body_md + key_points together, cached and reused.
-create table chapters (
+create table if not exists chapters (
   id uuid primary key default gen_random_uuid(),
   subtopic_id uuid not null references subtopics(id) on delete cascade,
   body_md text not null,
@@ -52,7 +52,7 @@ create table chapters (
   unique (subtopic_id, model_version)
 );
 
-create table sessions (
+create table if not exists sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references users(id) on delete cascade,
   subtopic_id uuid not null references subtopics(id),
@@ -71,7 +71,7 @@ create table sessions (
   created_at timestamptz not null default now()
 );
 
-create table scores (
+create table if not exists scores (
   id uuid primary key default gen_random_uuid(),
   session_id uuid not null unique references sessions(id) on delete cascade,
   accuracy int not null,
@@ -86,7 +86,7 @@ create table scores (
   created_at timestamptz not null default now()
 );
 
-create table streaks (
+create table if not exists streaks (
   user_id uuid not null references users(id) on delete cascade,
   week_start date not null,
   sessions_completed int not null default 0,
@@ -97,7 +97,7 @@ create table streaks (
   primary key (user_id, week_start)
 );
 
-create table friendships (
+create table if not exists friendships (
   user_id uuid not null references users(id) on delete cascade,
   friend_id uuid not null references users(id) on delete cascade,
   status text not null default 'pending' check (status in ('pending', 'accepted')),
@@ -106,7 +106,7 @@ create table friendships (
 );
 
 -- Background job queue. Transcription and grading always run here, never inline.
-create table jobs (
+create table if not exists jobs (
   id uuid primary key default gen_random_uuid(),
   type text not null check (type in ('transcribe', 'grade')),
   payload jsonb not null,
@@ -118,7 +118,7 @@ create table jobs (
   updated_at timestamptz not null default now()
 );
 
-create table analytics_events (
+create table if not exists analytics_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   event text not null,
@@ -126,8 +126,8 @@ create table analytics_events (
   created_at timestamptz not null default now()
 );
 
-create index idx_subtopics_deck on subtopics(deck_id);
-create index idx_chapters_subtopic on chapters(subtopic_id);
-create index idx_sessions_user on sessions(user_id, created_at desc);
-create index idx_jobs_poll on jobs(status, run_after);
-create index idx_analytics_user_event on analytics_events(user_id, event, created_at);
+create index if not exists idx_subtopics_deck on subtopics(deck_id);
+create index if not exists idx_chapters_subtopic on chapters(subtopic_id);
+create index if not exists idx_sessions_user on sessions(user_id, created_at desc);
+create index if not exists idx_jobs_poll on jobs(status, run_after);
+create index if not exists idx_analytics_user_event on analytics_events(user_id, event, created_at);
