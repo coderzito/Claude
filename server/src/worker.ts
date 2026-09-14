@@ -149,7 +149,7 @@ async function tick() {
 }
 
 async function main() {
-  console.log("cold-call worker started");
+  console.log("passion-study worker started");
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await tick();

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Cold Call",
-    "slug": "cold-call",
+    "name": "Passion Study",
+    "slug": "passion-study",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -10,27 +10,33 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.coldcall.app",
+      "bundleIdentifier": "com.passionstudy.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Cold Call records your spoken explanation so it can be graded against the chapter you studied."
+        "NSMicrophoneUsageDescription": "Passion Study records your spoken explanation so it can be graded against the chapter you studied."
       }
     },
     "android": {
-      "package": "com.coldcall.app",
-      "permissions": ["RECORD_AUDIO"]
+      "package": "com.passionstudy.app",
+      "permissions": [
+        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "extra": {
       "apiUrl": "https://claude-z1b5uq.fly.dev",
       "eas": {
-        "projectId": "86a51df1-b181-4bda-95a5-41a1488fa573"
+        "projectId": "a0ae12fc-e4e2-446c-8c75-8ebd0f4c97c7"
       }
     },
-    "owner": "trevorzito",
+    "owner": "passion-study",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/86a51df1-b181-4bda-95a5-41a1488fa573"
+      "url": "https://u.expo.dev/a0ae12fc-e4e2-446c-8c75-8ebd0f4c97c7"
     },
     "plugins": [
       "expo-audio"

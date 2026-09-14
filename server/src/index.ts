@@ -31,5 +31,5 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 app.listen(config.port, () => {
-  console.log(`cold-call server listening on :${config.port}`);
+  console.log(`passion-study server listening on :${config.port}`);
 });

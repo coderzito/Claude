@@ -1,4 +1,4 @@
-# Cold Call
+# Passion Study
 
 A study app: roll a random subtopic, study an AI-generated chapter for 4 minutes,
 then record a 1-2 minute spoken explanation. The app grades the speech against the
@@ -77,7 +77,7 @@ npm run dev:client
 ```
 
 Scan the QR code with the **Expo Go** app on your phone (App Store / Play Store) to
-run Cold Call as an installed app — no browser, no app-store review needed for
+run Passion Study as an installed app — no browser, no app-store review needed for
 local dev. For a real standalone install (own icon, no Expo Go wrapper), build with
 [EAS Build](https://docs.expo.dev/build/introduction/) once you're ready to ship.
 

@@ -1,4 +1,4 @@
--- Cold Call schema
+-- Passion Study schema
 
 create extension if not exists "pgcrypto";
 

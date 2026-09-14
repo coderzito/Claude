@@ -41,7 +41,7 @@ export default function RecordingScreen({ route, navigation }: Props) {
     async function begin() {
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert("Microphone needed", "Cold Call needs mic access to record your explanation.");
+        Alert.alert("Microphone needed", "Passion Study needs mic access to record your explanation.");
         navigation.goBack();
         return;
       }

@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Text style={{ color: theme.text, fontSize: 28, fontWeight: "700", marginBottom: 24 }}>Cold Call</Text>
+      <Text style={{ color: theme.text, fontSize: 28, fontWeight: "700", marginBottom: 24 }}>Passion Study</Text>
       <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoComplete="email" />
       <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" />
       <Button title="Log in" onPress={onSubmit} loading={loading} />
