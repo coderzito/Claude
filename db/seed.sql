@@ -94,7 +94,7 @@ insert into subtopics (deck_id, title, difficulty_tier) values
 
   ('00000000-0000-0000-0000-000000000007', 'The trolley problem and utilitarian ethics', 'intro'),
   ('00000000-0000-0000-0000-000000000007', 'Descartes and radical doubt', 'core'),
-  ('00000000-0000-0000-0000-000000000007', "Plato's theory of forms", 'core'),
+  ('00000000-0000-0000-0000-000000000007', 'Plato''s theory of forms', 'core'),
   ('00000000-0000-0000-0000-000000000007', 'Free will vs determinism', 'core'),
   ('00000000-0000-0000-0000-000000000007', 'The is-ought problem', 'advanced'),
   ('00000000-0000-0000-0000-000000000007', 'Existentialism and authenticity', 'advanced'),
@@ -106,17 +106,17 @@ insert into subtopics (deck_id, title, difficulty_tier) values
   ('00000000-0000-0000-0000-000000000008', 'Reaction rates and catalysis', 'core'),
   ('00000000-0000-0000-0000-000000000008', 'Stoichiometry and limiting reagents', 'core'),
   ('00000000-0000-0000-0000-000000000008', 'Redox reactions', 'advanced'),
-  ('00000000-0000-0000-0000-000000000008', "The periodic table's organizing trends", 'intro'),
+  ('00000000-0000-0000-0000-000000000008', 'The periodic table''s organizing trends', 'intro'),
 
-  ('00000000-0000-0000-0000-000000000009', "Newton's three laws of motion", 'intro'),
+  ('00000000-0000-0000-0000-000000000009', 'Newton''s three laws of motion', 'intro'),
   ('00000000-0000-0000-0000-000000000009', 'Conservation of energy and momentum', 'core'),
-  ('00000000-0000-0000-0000-000000000009', "Electric fields and Coulomb's law", 'core'),
+  ('00000000-0000-0000-0000-000000000009', 'Electric fields and Coulomb''s law', 'core'),
   ('00000000-0000-0000-0000-000000000009', 'Waves, frequency, and interference', 'core'),
   ('00000000-0000-0000-0000-000000000009', 'Thermodynamics and entropy', 'advanced'),
   ('00000000-0000-0000-0000-000000000009', 'Special relativity basics', 'advanced'),
   ('00000000-0000-0000-0000-000000000009', 'Quantum superposition', 'advanced'),
 
-  ('00000000-0000-0000-0000-00000000000a', "The hero's journey structure", 'intro'),
+  ('00000000-0000-0000-0000-00000000000a', 'The hero''s journey structure', 'intro'),
   ('00000000-0000-0000-0000-00000000000a', 'Magical realism as a literary mode', 'core'),
   ('00000000-0000-0000-0000-00000000000a', 'Unreliable narrators', 'core'),
   ('00000000-0000-0000-0000-00000000000a', 'Tragic heroes and the tragic flaw', 'core'),
@@ -124,7 +124,7 @@ insert into subtopics (deck_id, title, difficulty_tier) values
   ('00000000-0000-0000-0000-00000000000a', 'Allegory vs symbolism', 'core'),
   ('00000000-0000-0000-0000-00000000000a', 'Colonial and postcolonial narrative voice', 'advanced'),
 
-  ('00000000-0000-0000-0000-00000000000b', "The Renaissance's rediscovery of perspective", 'intro'),
+  ('00000000-0000-0000-0000-00000000000b', 'The Renaissance''s rediscovery of perspective', 'intro'),
   ('00000000-0000-0000-0000-00000000000b', 'Impressionism and the depiction of light', 'core'),
   ('00000000-0000-0000-0000-00000000000b', 'Cubism and fractured form', 'core'),
   ('00000000-0000-0000-0000-00000000000b', 'Baroque drama and chiaroscuro', 'core'),
@@ -144,7 +144,7 @@ insert into subtopics (deck_id, title, difficulty_tier) values
   ('00000000-0000-0000-0000-00000000000d', 'The normal distribution', 'core'),
   ('00000000-0000-0000-0000-00000000000d', 'Hypothesis testing and p-values', 'core'),
   ('00000000-0000-0000-0000-00000000000d', 'Correlation vs causation', 'intro'),
-  ('00000000-0000-0000-0000-00000000000d', "Bayes' theorem", 'advanced'),
+  ('00000000-0000-0000-0000-00000000000d', 'Bayes'' theorem', 'advanced'),
   ('00000000-0000-0000-0000-00000000000d', 'Sampling bias', 'core'),
   ('00000000-0000-0000-0000-00000000000d', 'Confidence intervals', 'advanced')
 on conflict (deck_id, title) do nothing;
