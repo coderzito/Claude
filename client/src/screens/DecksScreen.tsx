@@ -39,9 +39,18 @@ export default function DecksScreen({ navigation }: Props) {
 
     setUploading(true);
     try {
+      // RN's newer networking stack dropped support for the classic
+      // `{ uri, name, type }` FormData shorthand — read the picked file into
+      // a real Blob instead (see RecordingScreen for the same fix).
+      const fileResponse = await fetch(file.uri);
+      const rawBlob = await fileResponse.blob();
+      // The server branches on mimetype (PDF-parse vs plain text) — a bare
+      // local-file fetch doesn't reliably set it, so pin it explicitly.
+      const blob = new Blob([rawBlob], { type: file.mimeType ?? "application/octet-stream" });
+
       const form = new FormData();
       form.append("title", file.name.replace(/\.(pdf|txt)$/i, ""));
-      form.append("file", { uri: file.uri, name: file.name, type: file.mimeType ?? "application/octet-stream" } as any);
+      form.append("file", blob, file.name);
       const token = await getToken();
       const res = await fetch(`${API_URL}/decks/syllabus`, {
         method: "POST",
