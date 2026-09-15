@@ -7,3 +7,5 @@ dist/
 .DS_Store
 .secrets/
 server/.build/
+__pycache__/
+*.pyc
