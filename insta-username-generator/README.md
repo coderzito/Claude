@@ -28,6 +28,8 @@ You need Node 18 or later. There are no dependencies to install.
   set a "starts with" prefix and how many names to generate.
 - **Rules enforced**: 1–30 chars, only `a-z 0-9 . _`, no period at the start or end,
   no `..`, not all numbers (`public/generator.js`).
+- **Hide taken names** (on by default): after you click Generate, the app checks each name on
+  Instagram and removes the ones that already have an account. The rest are marked "No account".
 - **Check** shows whether an account exists without leaving the page.
 - **Go to Insta** opens `/go/<username>`, where the server looks up the account:
   - the account exists → redirects to `https://www.instagram.com/<username>/`

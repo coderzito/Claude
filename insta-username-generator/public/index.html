@@ -43,7 +43,10 @@
       <label><input id="letters" type="checkbox" checked> Letters a-z</label>
       <label><input id="digits" type="checkbox" checked> Numbers 0-9</label>
       <label><input id="underscores" type="checkbox" checked> Underscores _</label>
-      <label><input id="periods" type="checkbox"> Periods .</label>
+      <label><input id="periods" type="checkbox" checked> Periods .</label>
+    </div>
+    <div class="checks">
+      <label><input id="hideTaken" type="checkbox" checked> Hide taken names (checks each one on Instagram)</label>
     </div>
     <div class="actions">
       <button id="generate" class="primary">Generate</button>
@@ -52,6 +55,7 @@
   </section>
 
   <section class="card">
+    <p id="filterStatus" class="hunt-status" hidden></p>
     <ul id="results" class="results"></ul>
   </section>
 

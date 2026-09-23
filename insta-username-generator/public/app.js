@@ -45,17 +45,57 @@
 
   async function check(name, badge) {
     setBadge(badge, 'checking');
+    let status = 'unknown';
     try {
       const res = await fetch('/api/check?u=' + encodeURIComponent(name));
-      const data = await res.json();
-      setBadge(badge, data.status || 'unknown');
-    } catch {
-      setBadge(badge, 'unknown');
+      status = (await res.json()).status || 'unknown';
+    } catch { /* network error: leave as unknown */ }
+    setBadge(badge, status);
+    return status;
+  }
+
+  // "Hide taken names": check each listed name in turn and drop the ones with an account.
+  let filterRun = 0;
+  const rows = new Map(); // name -> { li, badge }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function setFilterStatus(text) {
+    const el = $('filterStatus');
+    el.textContent = text;
+    el.hidden = !text;
+  }
+
+  async function filterTaken() {
+    const id = ++filterRun;
+    const names = current.slice();
+    let hidden = 0, unknown = 0;
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i];
+      const row = rows.get(name);
+      if (!row) continue;
+      setFilterStatus(`Checking ${i + 1} of ${names.length}… hid ${hidden} taken so far`);
+      const status = await check(name, row.badge);
+      if (id !== filterRun) return; // a newer Generate replaced this list
+      if (status === 'exists') {
+        hidden++;
+        row.li.remove();
+        rows.delete(name);
+        current = current.filter((n) => n !== name);
+      } else if (status === 'unknown') {
+        unknown++;
+      }
+      if (i < names.length - 1) await sleep(1500);
+      if (id !== filterRun) return;
     }
+    let msg = `Done: hid ${hidden} taken name${hidden === 1 ? '' : 's'}, ${current.length - unknown} with no account left.`;
+    if (unknown) msg += ` ${unknown} couldn't be checked (Instagram is limiting lookups). Try again in a minute.`;
+    if (!current.length) msg += ' Hit Generate for more.';
+    setFilterStatus(msg);
   }
 
   function render() {
     results.innerHTML = '';
+    rows.clear();
     for (const name of current) {
       const li = document.createElement('li');
       const span = document.createElement('span');
@@ -78,6 +118,7 @@
       );
       li.append(span, badge, actions);
       results.appendChild(li);
+      rows.set(name, { li, badge });
     }
   }
 
@@ -94,6 +135,9 @@
     const count = Math.max(1, Math.min(50, +$('count').value || 10));
     current = UsernameGen.generateMany(count, options());
     render();
+    filterRun++; // stop any check still running on the old list
+    setFilterStatus('');
+    if ($('hideTaken').checked) filterTaken();
   }
 
   $('min').addEventListener('input', () => syncLengthLabels('min'));
