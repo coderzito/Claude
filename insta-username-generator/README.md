@@ -4,6 +4,14 @@ Generates random usernames that follow Instagram's rules, and opens them on Inst
 
 ## Run it
 
+**Easiest:** install Node.js from https://nodejs.org, then double-click
+`Start (Windows).bat` or `Start (Mac).command`. It opens the app in your browser.
+Keep that window open while you use the app. Close it to stop.
+
+On a Mac, the first time, right-click the file → Open → Open, because it isn't from the App Store.
+
+**From a terminal:**
+
 ```bash
 cd insta-username-generator
 npm start          # http://localhost:3000  (PORT=xxxx to change)
