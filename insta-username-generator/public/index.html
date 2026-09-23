@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Insta Username Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>Insta Username Generator</h1>
+  <p class="sub">Random usernames that follow Instagram's rules. Set the length and characters, then open any one on Instagram.</p>
+
+  <section class="card">
+    <div class="row">
+      <div class="field">
+        <label for="min">Min length: <strong id="minVal">6</strong></label>
+        <input id="min" type="range" min="1" max="30" value="6">
+      </div>
+      <div class="field">
+        <label for="max">Max length: <strong id="maxVal">12</strong></label>
+        <input id="max" type="range" min="1" max="30" value="12">
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div class="field">
+        <label for="style">Style</label>
+        <select id="style">
+          <option value="random">Fully random characters</option>
+          <option value="readable">Readable (syllables)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="prefix">Starts with (optional)</label>
+        <input id="prefix" type="text" maxlength="30" placeholder="e.g. the" autocomplete="off">
+      </div>
+      <div class="field" style="flex:0 1 110px">
+        <label for="count">How many</label>
+        <input id="count" type="number" min="1" max="50" value="10">
+      </div>
+    </div>
+    <div class="checks">
+      <label><input id="letters" type="checkbox" checked> Letters a-z</label>
+      <label><input id="digits" type="checkbox" checked> Numbers 0-9</label>
+      <label><input id="underscores" type="checkbox" checked> Underscores _</label>
+      <label><input id="periods" type="checkbox"> Periods .</label>
+    </div>
+    <div class="actions">
+      <button id="generate" class="primary">Generate</button>
+      <button id="copyAll">Copy all</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <ul id="results" class="results"></ul>
+  </section>
+
+  <section class="card">
+    <strong>Instagram username rules applied</strong>
+    <ul class="rules">
+      <li>1 to 30 characters</li>
+      <li>Only letters, numbers, periods and underscores</li>
+      <li>No period at the start or end, and never two periods in a row</li>
+      <li>Can't be only numbers</li>
+    </ul>
+  </section>
+</main>
+
+<script src="generator.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

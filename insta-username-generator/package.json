@@ -1,0 +1,14 @@
+{
+  "name": "insta-username-generator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Generate random valid Instagram usernames and jump to the profile if it exists.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

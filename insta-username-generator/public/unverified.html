@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Couldn't Verify</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="center">
+  <p class="big">⏳</p>
+  <h1>Couldn't check right now</h1>
+  <p class="sub">Instagram is limiting lookups right now, so we couldn't confirm whether this account exists. Wait a minute and try again, or open Instagram anyway.</p>
+  <p><code id="name"></code></p>
+  <div class="actions">
+    <a class="btn" id="retry" href="/"><button class="primary">Try again</button></a>
+    <a class="btn" id="open" href="https://www.instagram.com/"><button>Open on Instagram anyway</button></a>
+    <a class="btn" href="/"><button>Back</button></a>
+  </div>
+</main>
+<script>
+  const u = new URLSearchParams(location.search).get('u') || '';
+  document.getElementById('name').textContent = '@' + u;
+  document.getElementById('retry').href = '/go/' + encodeURIComponent(u);
+  document.getElementById('open').href = 'https://www.instagram.com/' + encodeURIComponent(u) + '/';
+</script>
+</body>
+</html>
