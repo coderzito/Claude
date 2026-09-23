@@ -7,3 +7,4 @@ dist/
 .DS_Store
 .secrets/
 server/.build/
+insta-username-generator.zip
