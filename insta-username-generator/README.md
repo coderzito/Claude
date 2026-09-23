@@ -27,6 +27,22 @@ You need Node 18 or later. There are no dependencies to install.
   - Instagram rate-limited the lookup → goes to `unverified.html`, with *Try again*
     and *Open anyway* buttons
 
+## Bulk hunt (finding free short names)
+
+The **Bulk hunt** section generates names of an exact length (4 by default) with the
+character settings above. It checks them one at a time, a few seconds apart:
+
+- Names with no account are saved to a list. The list stays in your browser when you
+  reload. You can copy it, remove names, or open any name on Instagram.
+- It shows counts for checked, taken, no account, and couldn't verify.
+- If Instagram rate-limits a lookup, the hunt waits (30s, then 60s, 120s, up to 5 min)
+  and retries the same name. It never counts a name as free unless Instagram answered.
+
+Almost every letters-only 4-character name is taken. Turn on numbers and underscores to
+have a real chance. Also, "no account" doesn't guarantee you can register the name,
+because banned and reserved names look the same. Confirm on Instagram's "change
+username" screen.
+
 ## Why there's a server
 
 Browsers can't call Instagram directly because of CORS. `server.js` calls Instagram's

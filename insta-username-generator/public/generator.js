@@ -59,7 +59,8 @@
     const seps = [];
     if (opts.underscores) seps.push('_');
     if (opts.periods) seps.push('.');
-    if (!seps.length || chars.length < 3) return chars;
+    // Allowed, not required: about half of names get no separator at all.
+    if (!seps.length || chars.length < 3 || randInt(2) === 0) return chars;
     const count = 1 + randInt(Math.max(1, Math.floor(chars.length / 6)));
     for (let n = 0; n < count; n++) {
       const i = 1 + randInt(chars.length - 2); // never first or last
@@ -90,7 +91,8 @@
       const name = prefix + body;
       if (!validate(name)) return name;
     }
-    // Fallback that always satisfies the rules.
+    // The chosen characters can't make a valid name (e.g. digits only): retry with letters allowed.
+    if (!opts.letters || opts.style !== 'random') return generate(Object.assign({}, opts, { letters: true, style: 'random', minLength: min, maxLength: max }));
     return (prefix + 'user' + randInt(1e6)).replace(/\.+$/, '').slice(0, MAX_LEN);
   }
 

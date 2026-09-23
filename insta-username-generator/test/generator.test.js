@@ -35,3 +35,11 @@ test('generateMany returns unique names', () => {
   assert.equal(names.length, 50);
   assert.equal(new Set(names).size, 50);
 });
+
+test('digits-only settings still give valid names of the requested length', () => {
+  for (let i = 0; i < 500; i++) {
+    const n = generate({ minLength: 4, maxLength: 4, letters: false, digits: true, underscores: false });
+    assert.equal(validate(n), null, n);
+    assert.equal(n.length, 4, n);
+  }
+});

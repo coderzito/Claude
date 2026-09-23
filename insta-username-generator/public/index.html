@@ -56,6 +56,36 @@
   </section>
 
   <section class="card">
+    <h2>Bulk hunt</h2>
+    <p class="sub" style="margin-bottom:14px">Generates names and checks them one at a time, slowly, so Instagram doesn't block you. It uses the character and style settings above. Names that show no account are saved below. The list stays in this browser if you reload.</p>
+    <div class="row">
+      <div class="field">
+        <label for="huntLen">Exact length: <strong id="huntLenVal">4</strong></label>
+        <input id="huntLen" type="range" min="1" max="30" value="4">
+      </div>
+      <div class="field">
+        <label for="huntDelay">Seconds between checks: <strong id="huntDelayVal">4</strong></label>
+        <input id="huntDelay" type="range" min="2" max="30" value="4">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="huntStart" class="primary">Start hunting</button>
+      <button id="huntStop" disabled>Stop</button>
+      <button id="huntCopy">Copy free names</button>
+      <button id="huntClear">Clear list</button>
+    </div>
+    <p id="huntStatus" class="hunt-status">Not running.</p>
+    <p class="hunt-stats">
+      Checked <strong id="statChecked">0</strong> ·
+      Taken <strong id="statTaken">0</strong> ·
+      No account <strong id="statFree">0</strong> ·
+      Couldn't verify <strong id="statUnknown">0</strong>
+    </p>
+    <ul id="huntResults" class="results"></ul>
+    <p class="rules" style="padding:0;margin-top:10px">"No account" means nothing exists at that name right now. It may still be banned or reserved. To know for sure you can claim it, try it on Instagram's "change username" screen.</p>
+  </section>
+
+  <section class="card">
     <strong>Instagram username rules applied</strong>
     <ul class="rules">
       <li>1 to 30 characters</li>
@@ -68,5 +98,6 @@
 
 <script src="generator.js"></script>
 <script src="app.js"></script>
+<script src="bulk.js"></script>
 </body>
 </html>

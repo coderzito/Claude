@@ -87,3 +87,8 @@ ul.results li:last-child { border-bottom: none; }
 .center code { font-size: 1.2rem; }
 .center .actions { justify-content: center; }
 a.btn { text-decoration: none; }
+h2 { font-size: 1.2rem; margin: 0 0 4px; }
+.hunt-status { margin: 14px 0 4px; font-weight: 600; }
+.hunt-status.waiting { color: var(--warn); }
+.hunt-stats { color: var(--muted); margin: 0 0 8px; }
+button:disabled { opacity: .45; cursor: default; border-color: var(--border); }
