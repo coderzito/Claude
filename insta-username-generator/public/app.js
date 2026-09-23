@@ -84,13 +84,21 @@
       } else if (status === 'unknown') {
         unknown++;
       }
-      if (i < names.length - 1) await sleep(1500);
+      if (i < names.length - 1) await sleep(3000);
       if (id !== filterRun) return;
     }
     let msg = `Done: hid ${hidden} taken name${hidden === 1 ? '' : 's'}, ${current.length - unknown} with no account left.`;
-    if (unknown) msg += ` ${unknown} couldn't be checked (Instagram is limiting lookups). Try again in a minute.`;
     if (!current.length) msg += ' Hit Generate for more.';
     setFilterStatus(msg);
+    if (unknown) {
+      const el = $('filterStatus');
+      el.append(` ${unknown} couldn't be checked. `);
+      const a = document.createElement('a');
+      a.href = '/debug.html';
+      a.target = '_blank';
+      a.textContent = 'See why';
+      el.appendChild(a);
+    }
   }
 
   function render() {

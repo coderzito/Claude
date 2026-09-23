@@ -55,7 +55,16 @@ username" screen.
 
 ## Why there's a server
 
-Browsers can't call Instagram directly because of CORS. `server.js` calls Instagram's
-public web profile endpoint (`404` = no account, `200` with a user = exists) and caches
-each result for 10 minutes. Instagram rate-limits this endpoint heavily from cloud or
-datacenter IPs. It works much better when you run it on your own computer or network.
+Browsers can't call Instagram directly because of CORS, so `server.js` does the lookup.
+It tries three methods in order until one gets a definite answer:
+
+1. Instagram's web profile API on `i.instagram.com` (`404` = no account, `200` with a user = exists)
+2. The same API on `www.instagram.com`
+3. The public profile page's `<title>`
+
+Requests go through Node's `https` module, not the built-in `fetch`. Instagram refused
+`fetch` requests that it answered from `https`. When a method is refused, it rests for 30
+seconds. Answers are cached for 10 minutes.
+
+If names keep showing "Couldn't verify", open http://localhost:3000/debug.html. It shows
+exactly what Instagram answered for each method.

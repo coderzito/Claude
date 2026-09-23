@@ -1,6 +1,7 @@
 // Zero-dependency server: serves the UI and checks whether an Instagram account exists.
 // Browsers can't ask Instagram directly (CORS), so the check happens here.
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { validate } = require('./public/generator.js');
@@ -17,37 +18,102 @@ const MIME = {
   '.svg': 'image/svg+xml',
 };
 
-// Returns 'exists', 'missing', or 'unknown' (Instagram rate-limited us or was unreachable).
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+const APP_ID = '936619743392459'; // Instagram web app's public id
+
+// Plain HTTPS GET via Node's https module: it sends only the headers we give it (like curl),
+// which Instagram accepts more readily than the built-in fetch. Follows no redirects.
+function httpGet(url, headers) {
+  return new Promise((resolve) => {
+    const req = https.get(url, { headers, timeout: 8000 }, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (c) => { if (body.length < 3e6) body += c; });
+      res.on('end', () => resolve({ status: res.statusCode, location: res.headers.location || '', body }));
+    });
+    req.on('timeout', () => req.destroy(new Error('timeout')));
+    req.on('error', (e) => resolve({ status: 0, location: '', body: '', error: e.message }));
+  });
+}
+let request = httpGet; // swapped out in tests
+
+const apiVerdict = (r) => {
+  if (r.status === 404) return 'missing';
+  if (r.status === 200) {
+    try {
+      const body = JSON.parse(r.body);
+      if (body && body.data) return body.data.user ? 'exists' : 'missing';
+    } catch { /* not JSON */ }
+  }
+  return 'unknown';
+};
+
+// Each method answers 'exists', 'missing' or 'unknown'. They're tried in order until one is sure.
+const METHODS = [
+  {
+    name: 'Profile API (i.instagram.com)',
+    url: (u) => `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(u)}`,
+    headers: () => ({ 'User-Agent': UA, 'x-ig-app-id': APP_ID, Accept: '*/*' }),
+    verdict: apiVerdict,
+  },
+  {
+    name: 'Profile API (www.instagram.com)',
+    url: (u) => `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(u)}`,
+    headers: (u) => ({
+      'User-Agent': UA, 'x-ig-app-id': APP_ID, Accept: '*/*', 'X-Requested-With': 'XMLHttpRequest',
+      Referer: `https://www.instagram.com/${u}/`,
+    }),
+    verdict: apiVerdict,
+  },
+  {
+    name: 'Public profile page',
+    url: (u) => `https://www.instagram.com/${encodeURIComponent(u)}/`,
+    headers: () => ({ 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'en-US,en;q=0.9' }),
+    verdict: (r, u) => {
+      if (r.status === 404) return 'missing';
+      if (r.status !== 200) return 'unknown'; // 302 to the login page tells us nothing
+      // Judge only by the page title: the rest of the page carries lots of built-in text.
+      const m = r.body.match(/<title[^>]*>([^<]*)<\/title>/i);
+      const title = m ? m[1].toLowerCase() : '';
+      if (title.includes(`(@${u})`) || title.includes(`(&#064;${u})`)) return 'exists';
+      if (title.includes('page not found')) return 'missing';
+      return 'unknown';
+    },
+  },
+];
+
+// After a method is refused (rate limit / login wall), rest it for a while instead of hammering it.
+const COOLDOWN_MS = 30 * 1000;
+const restingUntil = new Map(); // method name -> timestamp
+
+async function runMethod(m, username) {
+  const r = await request(m.url(username), m.headers(username));
+  const verdict = m.verdict(r, username);
+  if (verdict === 'unknown') restingUntil.set(m.name, Date.now() + COOLDOWN_MS);
+  return { method: m.name, httpStatus: r.status, redirect: r.location, error: r.error, verdict, snippet: r.body.slice(0, 300) };
+}
+
+// Returns 'exists', 'missing', or 'unknown' (every method was refused or unreachable).
 async function checkInstagram(username) {
   const hit = cache.get(username);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.status;
 
   let status = 'unknown';
-  try {
-    const res = await fetch(
-      `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`,
-      {
-        headers: {
-          'x-ig-app-id': '936619743392459', // Instagram web app's public id
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36',
-          Accept: 'application/json',
-        },
-        signal: AbortSignal.timeout(8000),
-      }
-    );
-    if (res.status === 404) {
-      status = 'missing';
-    } else if (res.ok) {
-      const body = await res.json().catch(() => null);
-      if (body && body.data) status = body.data.user ? 'exists' : 'missing';
-    }
-    // 401/429 = rate limited / login wall: leave as 'unknown'.
-  } catch {
-    status = 'unknown';
+  for (const m of METHODS) {
+    if ((restingUntil.get(m.name) || 0) > Date.now()) continue;
+    const { verdict } = await runMethod(m, username);
+    if (verdict !== 'unknown') { status = verdict; break; }
   }
 
   if (status !== 'unknown') cache.set(username, { status, at: Date.now() });
   return status;
+}
+
+// Runs every method (ignoring cooldowns) and reports exactly what Instagram answered.
+async function diagnose(username) {
+  const results = [];
+  for (const m of METHODS) results.push(await runMethod(m, username));
+  return results;
 }
 
 function send(res, code, body, type = 'application/json; charset=utf-8', extra = {}) {
@@ -82,6 +148,13 @@ const server = http.createServer(async (req, res) => {
     return send(res, 200, JSON.stringify({ username: u, status }));
   }
 
+  // What each lookup method gets back from Instagram, for troubleshooting (see debug.html).
+  if (url.pathname === '/api/debug') {
+    const u = (url.searchParams.get('u') || 'instagram').toLowerCase();
+    if (validate(u)) return send(res, 400, JSON.stringify({ username: u, error: validate(u) }));
+    return send(res, 200, JSON.stringify({ username: u, results: await diagnose(u) }));
+  }
+
   // "Go to Instagram": profile if it exists, error page if it doesn't.
   const go = url.pathname.match(/^\/go\/([^/]+)\/?$/);
   if (go) {
@@ -101,4 +174,4 @@ if (require.main === module) {
   server.listen(PORT, () => console.log(`Instagram username generator on http://localhost:${PORT}`));
 }
 
-module.exports = { server, checkInstagram };
+module.exports = { server, checkInstagram, diagnose, setRequester: (fn) => { request = fn; }, resetCooldowns: () => restingUntil.clear() };

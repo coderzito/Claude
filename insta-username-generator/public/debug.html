@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lookup Diagnostics</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    td.snip { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .75rem; word-break: break-all; color: var(--muted); }
+    .wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Lookup diagnostics</h1>
+  <p class="sub">Shows exactly what Instagram answers for each way the app checks a name. If names keep saying "Couldn't verify", screenshot this page and send it to Claude.</p>
+  <section class="card">
+    <div class="row">
+      <div class="field">
+        <label for="u">Username to test</label>
+        <input id="u" type="text" value="instagram" autocomplete="off">
+      </div>
+    </div>
+    <div class="actions"><button id="run" class="primary">Run test</button> <a class="btn" href="/"><button>Back</button></a></div>
+    <p id="status" class="hunt-status"></p>
+    <div class="wrap"><table id="out" hidden>
+      <thead><tr><th>Method</th><th>HTTP</th><th>Result</th><th>What Instagram sent (start)</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search).get('u');
+  if (q) $('u').value = q;
+  async function run() {
+    $('status').textContent = 'Asking Instagram…';
+    $('out').hidden = true;
+    try {
+      const data = await (await fetch('/api/debug?u=' + encodeURIComponent($('u').value.trim()))).json();
+      if (data.error) { $('status').textContent = data.error; return; }
+      const tb = $('out').querySelector('tbody');
+      tb.innerHTML = '';
+      for (const r of data.results) {
+        const tr = document.createElement('tr');
+        const http = r.error ? 'error: ' + r.error : r.httpStatus + (r.redirect ? ' → ' + r.redirect.slice(0, 60) : '');
+        for (const [text, cls] of [[r.method], [http], [r.verdict], [r.snippet, 'snip']]) {
+          const td = document.createElement('td');
+          td.textContent = text || '';
+          if (cls) td.className = cls;
+          tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+      }
+      $('out').hidden = false;
+      $('status').textContent = 'Tested @' + data.username + ' at ' + new Date().toLocaleTimeString();
+    } catch (e) {
+      $('status').textContent = "Couldn't reach the app. Is the black window still open?";
+    }
+  }
+  $('run').addEventListener('click', run);
+  run();
+</script>
+</body>
+</html>
